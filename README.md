@@ -1,4 +1,4 @@
-# Mechanization of a noninterference proof for a toy imperative language with small-step semantics.
+# Mechanization of a noninterference proof for a toy imperative language with small-step semantics in Coq.
 
 Author: Aslan Askarov
 
