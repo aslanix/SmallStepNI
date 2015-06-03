@@ -19,7 +19,7 @@ Proof.
 Qed.
 
 Theorem update_neq {X : Type} : forall x2 x1 (n:X) st,
-  x2 <> x2 -> 
+  x1 <> x2 -> 
    (update_env st x2 n) x1 = (st x1).
 Proof.
   update_destruct.
