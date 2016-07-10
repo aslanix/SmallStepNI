@@ -1,6 +1,6 @@
 all: libs basic bridge wf le obs niexp ni
 
-LOADPATH = -I lib/ -I lib/cpdt/src/
+LOADPATH = -I lib/ -R lib/cpdt/src/ "Cpdt" 
 clean:
 	rm *.vo *.glob
 
@@ -20,4 +20,3 @@ niexp:
 	coqc $(LOADPATH) NIexp.v
 ni: 
 	coqc $(LOADPATH) NI.v
-	
