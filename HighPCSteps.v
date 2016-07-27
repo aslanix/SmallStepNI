@@ -7,6 +7,7 @@ File Created: 2016-07-26 (the content is from 2015)
 
 Require Import Bool Arith List CpdtTactics SfLib LibTactics.
 Require Import Coq.Program.Equality.
+Require Import Omega.
 
 Set Implicit Arguments.
 
