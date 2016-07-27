@@ -3,7 +3,7 @@ Require Import Coq.Program.Equality.
 
 Set Implicit Arguments.
 
-Require Import Identifier Environment Imperative WellFormedness UtilTactics.
+Require Import Identifier Environment Imperative WellFormedness UtilTactics Types.
 
 
 
@@ -339,3 +339,17 @@ Qed.
 
 (* TODO: beautify the above prove! :(  2015-04-03 *)
 
+
+
+Lemma state_low_eq_trans_square:
+                forall Γ m s m' s',
+                  state_low_eq Γ m s ->
+                  state_low_eq Γ m m' ->
+                  state_low_eq Γ s s' ->
+                  state_low_eq Γ m' s'.
+Proof.
+                intros.
+                assert (state_low_eq Γ m s') by  apply (state_low_eq_trans H H1).
+                assert (state_low_eq Γ m' m) by  (eapply state_low_eq_sym; assumption).
+                apply (state_low_eq_trans H3 H2).
+Qed.

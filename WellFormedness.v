@@ -8,6 +8,8 @@ Set Implicit Arguments.
 
 Require Import Identifier Environment.
 Require Import Imperative UtilTactics.
+Require Import Types Augmented.
+
 
 
 Hint Resolve eq_exp_dec : Sec.
@@ -15,16 +17,16 @@ Hint Resolve eq_id_dec : Sec.
 Hint Resolve eq_cmd_dec : Sec.
 Hint Resolve eq_level_dec : Sec.
 Hint Resolve eq_event_dec: Sec.
-Hint Resolve eq_obs_dec : Sec.
-Hint Resolve multi_refl : Sec.
+(* Hint Resolve eq_obs_dec : Sec. *)
+(* Hint Resolve multi_refl : Sec. *)
 Hint Resolve flowsto_sym : Sec.
 Hint Resolve high_does_not_flow_to_low :Sec.
-Hint Resolve config_is_stop_config : Sec.
+(* Hint Resolve config_is_stop_config : Sec. *)
 
 
 Lemma pc_lowering:
         forall Γ pc c pc',
-          { Γ, pc' ⊢ c} -> pc ⊑ pc' -> { Γ, pc ⊢ c}.
+          -{ Γ, pc' ⊢ c}- -> pc ⊑ pc' -> -{ Γ, pc ⊢ c}-.
 Proof.
   intros.
   dependent induction H; try constructor; crush.
@@ -51,10 +53,10 @@ Definition wf_mem (m:state )  ( Γ: typenv): Prop :=
 
 Theorem preservation:
   forall Γ c m c' m' pc,
-    { Γ, pc ⊢ c} ->
+    -{ Γ, pc ⊢ c}- ->
     step 〈c, m 〉 〈c', m' 〉->
     wf_mem m Γ ->
-    wf_mem m' Γ /\ ( c' <> STOP -> {Γ, pc ⊢ c'} ).
+    wf_mem m' Γ /\ ( c' <> STOP -> -{Γ, pc ⊢ c'}- ).
 Proof.
   intros Γ c m c' m' pc H_wt H H_wf.
   cmd_cases (dependent induction c) Case.
@@ -157,10 +159,10 @@ Qed.
 
 Lemma preservation_event_step:
   forall Γ e c m c' m' pc,
-    { Γ, pc ⊢ c} ->
+    -{ Γ, pc ⊢ c}- ->
     event_step Γ e 〈c, m 〉 〈c', m' 〉->
     wf_mem m Γ ->
-    wf_mem m' Γ /\ ( c' <> STOP -> {Γ, pc ⊢ c'} ).
+    wf_mem m' Γ /\ ( c' <> STOP -> -{Γ, pc ⊢ c'}- ).
 Proof.
   intros.
   dependent induction H0; subst;
@@ -169,47 +171,20 @@ Proof.
       | [ H : 〈?C, ?M 〉 ⇒ 〈?C', ?M' 〉, H': wf_mem ?M Γ |- _ ] =>
         apply preservation with (c := C) (m := M); auto
     end.
-
-
-
   {
-  inversion H;
-  repeat specialize_gen;
-  destruct_conj;
-    split; auto;
-  intros;
-  repeat specialize_gen;
-  constructor; assumption.
-  }
+    inversion H; subst.
+    repeat specialize_gen; crush; constructor;crush.
+  }    
   {
-    inv_event_step; subst; auto.
-    split.
-
-     match goal with
-      | [ H : 〈?C, ?M 〉 ⇒ 〈?C', ?M' 〉, H': wf_mem ?M Γ |- _ ] =>
-        apply preservation with ( Γ := Γ) (pc := pc)  in H; auto
-     end.
-     destruct_conj; auto.
-     inversion H; crush.
-     intros.
-     inversion H; crush.
-     false.
+    specialize (IHevent_step STOP m').
+    inversion H.
+    crush.
   }
-  {
-    inv_event_step; subst; auto.
-     match goal with
-      | [ H : 〈?C, ?M 〉 ⇒ 〈?C', ?M' 〉, H': wf_mem ?M Γ |- _ ] =>
-        apply preservation with ( Γ := Γ) (pc := pc)  in H; auto
-     end.
-     split; auto.
 
-     intros.
-     inversion H; crush.
-     constructor.
-  }
 Qed.  
 
 
+(* 
 
 
 
@@ -231,3 +206,4 @@ Qed.
 
 
 
+*)

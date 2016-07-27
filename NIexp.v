@@ -3,7 +3,7 @@ Require Import Coq.Program.Equality.
 
 Set Implicit Arguments.
 
-Require Import Identifier Environment Imperative WellFormedness LowEq.
+Require Import Identifier Environment Imperative WellFormedness LowEq Types.
 
 (* Non-interference for expressions *)
 Theorem ni_exp: forall Γ m1 m2 e u v ℓ,
