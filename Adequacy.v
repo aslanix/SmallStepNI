@@ -1,13 +1,13 @@
 (** Adequacy of the bridge semantics w.r.t. standard semantics for
 well-typed programs.
 
-Author: Aslan Askarov 
+Author: Aslan Askarov
 Created: 2016-07-27
 
-- Note: that well-typedness is required may potentially be relaxed, 
+- Note: that well-typedness is required may potentially be relaxed,
   but we leave that for future investigation.
 
- *) 
+ *)
 
 
 
@@ -18,12 +18,12 @@ Require Import Omega.
 Set Implicit Arguments.
 
 Require Import Identifier Environment Imperative Types Augmented Bridge.
-Require Import WellFormedness LowEq NIexp.
+Require Import WellFormedness.
 Require Import InductionPrinciple.
 Require Import UtilTactics.
 Require Import BridgeTactics.
 Require Import BridgeProperties.
-Require Import HighPCSteps.
+
 
 
 Lemma adequacy_of_event_steps:
@@ -94,13 +94,12 @@ Proof.
     constructor~ .
     crush.
   }
-Qed.   
+Qed.
 
 (* TODO: 2016-07-28: simplify the above lemma *)
 
 
 
-(* Multi-N relation *)
 
 
 Theorem bridge_adequacy:
@@ -119,8 +118,8 @@ Proof.
 
   dependent induction n.
   (* n = 0 *)
-  { 
-    left~. 
+  {
+    left~.
     inverts H. auto.
   }
 
@@ -129,15 +128,15 @@ Proof.
   {
     right; subst.
     inversion H.
-    
-    
+
+
     match goal with  [ H : 〈 c, m 〉 ⇒ ?y |- _ ] => destruct y as [c' m'] end; subst.
     match goal with [ H:  〈 c', m' 〉 ⇒/+ n +/ 〈 STOP, m_end 〉 |- _ ] => rename H into H_n end.
     match goal with [ H:  〈 c, m 〉 ⇒ 〈c', m' 〉 |- _ ] => rename H into H_step end.
 
-    
+
     specialize (IHn c' m' m_end H_n pc).
-        
+
     lets* (ev & H_ev) : adequacy_of_event_steps H_step.
 
     (* We define two auxiliary local propositions that consider the
@@ -157,7 +156,7 @@ Proof.
       compare c' STOP; intros;subst.
       * clear IHn.
 
-        
+
         lets : multi_idx_stop_trivial H_n; subst.
         (exists*〈STOP, m_end 〉0).
         splits~ ; try omega.
@@ -181,7 +180,7 @@ Proof.
         lets : multi_idx_stop_trivial H_n; subst.
         splits~ ; try omega.
         applys*  bridge_stop_num.
-      - forwards*   (H_wf' & H_wt') : preservation. 
+      - forwards*   (H_wf' & H_wt') : preservation.
         specializes~ H_wt'.
         specializes~ IHn.
         destruct* IHn as [? | ?IHH_multi].
@@ -191,8 +190,8 @@ Proof.
         splits~ ; try omega.
         applys* bridge_trans_num.
     }
-    
-    
+
+
     (* now we are ready to do the case analysis of the event, using the above assertions *)
     destruct ev.
     - (* Empty Event *)

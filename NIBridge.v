@@ -14,13 +14,13 @@ Require Import HighPCSteps.
 
 
 
-              
-            
-        
 
 
 
- 
+
+
+
+
 Definition NI_idx (n: nat): Prop :=
   forall Γ pc c,
     -{ Γ, pc ⊢ c }- ->
@@ -41,7 +41,7 @@ Proof.
   (* Base case *)
   {
     unfold NI_idx.
-    intros Γ pc c  H; subst. 
+    intros Γ pc c  H; subst.
     cmd_has_type_cases (induction H) Case;
       intros m s ev1 ev2 c_end d_end m_end s_end n' leq H_m H'_s.
 
@@ -63,16 +63,16 @@ Proof.
                (apply assign_bridge_properties in H; repeat (super_destruct; subst))
              |  [ H: Γ x = Some ?U, H' : Γ x = Some ?V |- _ ] =>
                 (assert (U = V) by congruence; subst; clear H)
-         end). 
+         end).
 
-      repeat match goal with 
+      repeat match goal with
         | [  H:  {{Γ ⊢ e : ℓ}},
                  _ : eval e m ?X1,
                      _ : eval e s ?X2,
                          _ : Γ x = Some ?ℓ'
              |- _] =>
-          (* this case considers the main reasoning : 
-.             - low-equivalences, memory updates, ni for expressions 
+          (* this case considers the main reasoning :
+             - low-equivalences, memory updates, ni for expressions
            *)
           ( assert (val_low_eq ℓ' X1 X2) as LE
               by (apply low_eq_flowsto with ℓ; auto; apply ni_exp with Γ m s e; auto);
@@ -95,9 +95,9 @@ Proof.
 
       super_destruct.
       (* the above destruct gives us four cases; only one is possible *)
-      
+
       (* auxiliary Ltac to apply the IH *)
-      
+
       Ltac apply_seq_comp_base_IH c1 m s IH leq:=
           match goal with
             | [ H : 〈c1, m 〉 ⇨+/(SL, ?Γ , ?ev1, _) 〈?C1, ?M 〉,
@@ -108,13 +108,12 @@ Proof.
       (* we now consider the four cases mentioned above *)
       {
         (* this is the only possible case, we get it from the IH *)
-(*        apply IHcmd_has_type1  *)
         apply_seq_comp_base_IH c1 m s IHcmd_has_type1 leq.
         super_destruct;
           repeat (split; auto).
         compare x STOP;intros;
         repeat (specialize_gen; subst); auto.
-      }          
+      }
       {
         (* impossible *)
         assert False by omega; contradiction.
@@ -134,9 +133,9 @@ Proof.
       }
     }
 
-    (* neither if or while are possible in base case 
+    (* neither if or while are possible in base case
        we use the following auxiliary ltac to discharge the goals *)
-    
+
     Ltac discharge_if_while_base H :=
       bridge_num_cases (inversion H) SCase; subst;
       repeat match goal with
@@ -144,13 +143,13 @@ Proof.
         | [ H : context [high_event_step] |- _] => (invert_high_steps; subst)
         | [ H: context [is_stop_config] |-  _ ] => (unfold is_stop_config in H; destruct H)
         | [ H : 〈 _, _  〉 = 〈STOP, _ 〉 |- _] => (inversion H ; contradiction)
-        | [ H : 0 >= 1 |- _ ] => omega 
+        | [ H : 0 >= 1 |- _ ] => omega
       end.
 
     Case "T_if".
     {
       (* impossible *)
-      discharge_if_while_base H_m. 
+      discharge_if_while_base H_m.
     }
     Case "T_While".
     {
@@ -163,7 +162,7 @@ Proof.
     intros.
     unfold NI_idx in *.
     intros Γ pc c H_wt.
-    (* we proceed by induction on the typing derivation *) 
+    (* we proceed by induction on the typing derivation *)
     cmd_has_type_cases (induction H_wt) Case;
       intros m s ev1 ev2 c_end d_end m_end s_end n' leq H_m H_s.
     Case "T_Skip".
@@ -192,7 +191,7 @@ Proof.
         LL, RL, LR, RR
         - LL is proven via inner HH;
         - RR is proven via outer HH;
-        - RL and LR are impossible 
+        - RL and LR are impossible
        *)
       {
         (* LL *)
@@ -201,29 +200,24 @@ Proof.
           repeat (split; auto).
         compare x STOP; intros;
         repeat (specialize_gen; subst); auto.
-        (* TODO: this boilerplate is similar to the LL case in the base case of the proof; consider 
+        (* TODO: this boilerplate is similar to the LL case in the base case of the proof; consider
            generalizing; 2016-07-25; aa *)
       }
 
 Ltac apply_seq_comp_ind_IH H c1 H_leq:=
    do 2 match goal with
-    (*      | [ H : 〈c1, ?m 〉 ⇨+/(SL, ?Γ , ?ev1, S ?X) 〈?C1, ?M 〉,
-                  H_alt : 〈c1, ?s 〉 ⇨+/(SL, _ , ?ev2, S ?n') 〈?C2, ?S 〉 |- _ ]
-            => (assert (〈c1, s 〉 ⇒+/(SL, Γ , ev2) 〈C2, S 〉) as H_alt by
-                     ( unfold bridge_step;  exists (n');   assumption )
-               )
-     *)
+
           | [ H: context [?X < S ?n] |- _ ]=>
             assert (X <= n) by omega; clear H
           | [ H_m : 〈c1, ?m 〉 ⇨+/(SL, ?Γ , ?ev1, S ?X) 〈?C1, ?M 〉,
                     H_s: 〈c1, ?s 〉 ⇨+/(SL, _ , ?ev2, S ?n') 〈?C2, ?S 〉,
                          H_wt1 : -{ ?Γ, ?pc ⊢ c1 }-,
                          XX : context [ ?X <= _ ] |- _  ]
-            => 
+            =>
             specialize (H X XX Γ pc c1 H_wt1 m s ev1 ev2  C1 C2 M S n' H_leq H_m H_s)
         end.
 
-      
+
       {
         (* RL *)
         (* impossible - show via applying outer IH *)
@@ -246,7 +240,7 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
         clear IHH_wt1 IHH_wt2.
         (* RR *)
         (* save the outer hypothesis, because it is used twice *)
-        assert (IH_outer := H). 
+        assert (IH_outer := H).
         apply_seq_comp_ind_IH H c1 leq.
         destruct H.
 
@@ -259,18 +253,13 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
                     replace (S n - X) with (S (n-X))  in * by omega
                    )
                  | [ H : context [n' - ?X ] |- _ ] =>
-                   replace (n' - X) with (S (n' - 1 -  X)) in * by omega                 
+                   replace (n' - X) with (S (n' - 1 -  X)) in * by omega
              end.
 
         (* apply the IH *)
-        
+
         match goal with
-(*          | [ H : 〈c2, ?m 〉 ⇨+/(SL, ?Γ , ?ev1, S ?X) 〈?C1, ?M 〉,
-                  _ : 〈c2, ?s 〉 ⇨+/(SL, _ , ?ev2, S ?n') 〈?C2, ?S 〉 |- _ ]
-            => (assert (〈c2, s 〉 ⇒+/(SL, Γ , ev2) 〈C2, S 〉) as H_alt by
-                     ( unfold bridge_step;  exists (n');   assumption )
-               )
-*)
+
           | [ H_m : 〈c2, ?m 〉 ⇨+/(SL, ?Γ , ?ev1, S ?X) 〈?C1, ?M 〉,
                     H_s: 〈c2, ?s 〉 ⇨+/(SL, _ , ?ev2, S ?n') 〈?C2, ?S 〉,
                          H_wt : -{ ?Γ, ?pc ⊢ c2 }- ,
@@ -282,20 +271,20 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
            maybe clean up the code for IH application *)
       }
     }
-    
+
     Case "T_if".
     {
       clear IHH_wt1 IHH_wt2;
 
       apply if_bridge_properties in H_m;
       apply if_bridge_properties in H_s.
-      
+
       level_cases (destruct pc') SCase.
-      
+
       - (* pc' = Low *)
         (* let's destruct and show that both branches evaluate to the same *)
         (* establish ℓ-equivalence of the guard *)
-        
+
         assert (forall v1 v2,
                   eval e m v1 ->
                   eval  e s v2 ->
@@ -305,7 +294,7 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
                  inverts~ X;
                  impossible_flows
                ).
-        
+
         super_destruct;
           (* 4 sub-goals after destruct; we appeal to low-equivalence of the guard
              to discharge the goals where both branches take separate branches *)
@@ -319,19 +308,19 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
                    specializes~ H c_i
                   )
           end.
-        
+
       - (* pc' = High *)
         clear H. (* no need for the IH *)
         subst.
-        
+
         (* rather than dealing with four subcases of which branch is
           taken we extract the useful information about high ifs,
           namely that they take the bridge steps and are high
           themselves, and the rest of the case deals with these
           'abstract' programs c_i, c_j, where c_i that is taken from
           the m-run, and c_j that is taken from the s-run *)
-          
-        assert (exists c_i, 〈c_i, m 〉 ⇨+/(SL, Γ, ev1, S n) 〈c_end, m_end 〉 
+
+        assert (exists c_i, 〈c_i, m 〉 ⇨+/(SL, Γ, ev1, S n) 〈c_end, m_end 〉
                             /\ ( c_i = c1 \/ c_i = c2  ) /\ -{ Γ, High ⊢ c_i }-) as H_i
             by (super_destruct;
                 solve [exists c1; splits~ |  exists c2; split~ ]).
@@ -344,26 +333,26 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
                 end;
                 solve[ exists c1; splits~ | exists c2; splits~]
               ).
-        
+
         clear H_m H_s. (* we don't need these anymore *)
         destruct H_i as [c_i].
         destruct H_j as [c_j].
-        
+
         super_destruct.
-        
+
         assert (state_low_eq Γ m m_end /\ c_end = STOP /\ high_event Γ Low ev1)
           by (applys* high_pc_bridge c_i m ev1; inverts~ leq).
-        
+
         assert (state_low_eq Γ s s_end /\ d_end = STOP /\ high_event Γ Low ev2)
           by (applys* high_pc_bridge c_j s ev2; inverts~ leq).
-          
+
         super_destruct; subst.
         splits~.
         + apply state_low_eq_trans_square with m s; assumption.
         + split; intros; contradiction.
         + contradiction.
     }
-    
+
     Case "T_While".
     {
       clear IHH_wt. (* clear unnecessary hyps *)
@@ -375,7 +364,7 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
 
 
       assert ( -{ Γ, pc ⊢ IFB e THEN c;; WHILE e DO c END ELSE SKIP FI }- ).
-      { 
+      {
         apply  T_If with ℓ pc'; auto.
         applys* T_Seq.
         apply T_While with ℓ pc'; auto.

@@ -109,7 +109,7 @@ Notation " t '⇒*' t' " := (multistep t t') (at level 40).
 
 
 
-
+(* Indexed multi relation *)
 
 Definition relation_idx := fun X : Type => X -> X -> nat -> Prop.
 
@@ -130,37 +130,43 @@ Tactic Notation "multi_idx_cases" tactic(first) ident(c) :=
 
 
 
-(* Multi-step transitions *)
+(* Indexed multi-step transitions *)
 Definition multistep_idx := multi_idx step.
 Notation " t '⇒/+' n '+/' s" := (multi_idx step t s n) (at level 40).
 
 
+(* A pair of sanity check theorems; we don't really use them *)
+
 Theorem multi_idx_R:
   forall (X:Type) (R: relation X) ( x y : X),
     R x y -> (multi_idx R) x y 1.
-Proof.                     
+Proof.
   intros.
   eapply multi_step_more; eauto.
-Qed.  
+Qed.
+
+
 
 Theorem multi_idx_trans:
   forall n (X: Type) (R: relation X) ( x y z: X ) m,
     multi_idx R x y n ->
     multi_idx R y z m ->
     multi_idx R x z (n + m).
-Proof.    
+Proof.
   intros n X R.
   induction n; intros.
   -     inverts* H.
-        
+
   - inversion H; subst; auto.
     assert (multi_idx R x y0 1) by (econstructor; eauto).
-    
+
     specialize (IHn y0 y z m H5 H0).
     replace (S n + m) with (S (n + m)) by omega.
     eapply multi_step_more; eauto.
-Qed.    
+Qed.
 
+
+(* A relation from multi to indexed multi; this is used in the proof of Standard TINI *)
 
 Theorem from_multi_to_multi_idx:
   forall (X:Type) (R:relation X) (x y : X),
@@ -173,7 +179,3 @@ Proof.
     (exists (S n)).
     econstructor; eauto.
 Qed.
-
-(* TODO: 2016-07-28: move multi_idx someplace else *)
-
-

@@ -82,9 +82,9 @@ Proof.
     split.
     {
       intros.
-      unfold update_st; unfold update_env. 
+      unfold update_st; unfold update_env.
       destruct H_wf as [ H_wf' H_wf''].
-    
+
       compare i x; try apply eq_nat_dec; intros.
       {
         rewrite -> e0 in *.
@@ -122,9 +122,9 @@ Proof.
     inversion H_wt.
     inversion H; auto; subst.
 
-      
+
     {
-      specialize (IHc1 m c1' m' pc H4 H8 H_wf); 
+      specialize (IHc1 m c1' m' pc H4 H8 H_wf);
       split; crush.
       intros.
       apply T_Seq; auto.
@@ -135,7 +135,7 @@ Proof.
   }
   Case "IFB".
   {
-    inversion H_wt; 
+    inversion H_wt;
     inversion H; subst;
 
       split; auto;
@@ -166,7 +166,7 @@ Lemma preservation_event_step:
 Proof.
   intros.
   dependent induction H0; subst;
-  try 
+  try
     match goal with
       | [ H : 〈?C, ?M 〉 ⇒ 〈?C', ?M' 〉, H': wf_mem ?M Γ |- _ ] =>
         apply preservation with (c := C) (m := M); auto
@@ -174,36 +174,11 @@ Proof.
   {
     inversion H; subst.
     repeat specialize_gen; crush; constructor;crush.
-  }    
+  }
   {
     specialize (IHevent_step STOP m').
     inversion H.
     crush.
   }
 
-Qed.  
-
-
-(* 
-
-
-
-Lemma preservation_nh_event:
-  forall Γ pc c m c_end s, 
-    { Γ, pc ⊢ c} ->
-    〈 c, m 〉⇒/(H, Γ) 〈 c_end, s 〉 ->
-    wf_mem m Γ ->
-    wf_mem s Γ /\ (c_end <> STOP -> {Γ, pc ⊢ c_end}  ).
-
-Proof.
-  intros.
-  inversion H0;
-  match goal with 
-      | [ H: event_step _ ?EV _ _ |- _ ] =>              
-        apply preservation_event_step with (e:=EV) (c:=c) (m:=m); crush
-  end.
 Qed.
-
-
-
-*)

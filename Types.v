@@ -113,7 +113,6 @@ where "'-{' Γ ',' pc '⊢' c '}-'" := (cmd_has_type Γ pc c).
 Tactic Notation "cmd_has_type_cases" tactic (first) ident (c) :=
  first;
  [
-   (* Case_aux c "T_Stop" |  *)
    Case_aux c "T_Skip" | Case_aux c "T_Assign"  | Case_aux c "T_Seq"
  | Case_aux c "T_if" | Case_aux c "T_While" ].
 
@@ -126,7 +125,6 @@ Qed.
 
 
 
-(* TODO: move this to Types; 2016-07-26 *)
 Lemma wt_programs_are_not_stop:
   forall Γ pc c,
      -{ Γ, pc ⊢ c }- ->

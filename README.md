@@ -18,7 +18,7 @@ Invoke `make` to compile everything.
 
 ## ChangeLog
 
-### 2016-07-29: Adequacy and standard TINI
+### 2016-07-29: Adequacy and Standard TINI
 #### Added
 - Indexed multi-step relation
 - Adequacy theorem for the indexed multi-step relation
