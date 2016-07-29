@@ -2,7 +2,8 @@
 
 Author: Aslan Askarov
 
-The main NI theorem is in `NIBridge.v`
+- The standard TINI theorem is at the bottom of `TINI.v`.
+- The workhorse noninterference reasoning is in `NIBridge.v`.
 
 ## Usage
 Invoke `make` to compile everything.
@@ -16,6 +17,13 @@ Invoke `make` to compile everything.
 
 
 ## ChangeLog
+
+### 2016-07-29: Adequacy and standard TINI
+#### Added
+- Indexed multi-step relation
+- Adequacy theorem for the indexed multi-step relation
+- Preservation for bridge relation
+- The proof of Standard TINI via adequacy and NI for bridge
 
 ### 2016-07-27: Simplifying proof structure and porting to 8.5
 #### Added
