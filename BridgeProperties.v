@@ -1,4 +1,4 @@
-(* 
+(*
 (Single-trace) properties of bridge relation
 
 Author: Aslan Askarov
@@ -19,31 +19,62 @@ Require Import BridgeTactics.
 
 
 
+
+
+
+
 (* 2016-07-25
-   - auxiliarly ltac to deal with inductive cases 
-      (when inducting over n in bridge definition) 
+   - auxiliarly ltac to deal with inductive cases
+      (when inducting over n in bridge definition)
      to disregard impossible cases;
    - useful in the following two lemmas about inverting properties of skip and assign
 *)
 
-   
+
 Ltac bridge_inductive_impossible_aux H:=
     intros; inversion H; subst; invert_high_steps; stop_contradiction.
-  
+
 
 
 Ltac stop_contradiction_more:=
   match goal with
     | [ H: is_stop_config 〈?C, ?M 〉, H' : ?C <> STOP |- _ ] =>
-      inversion H; congruence 
+      inversion H; congruence
   end.
 
 Ltac invert_step:=
   match goal with [H : context[step] |- _ ] => inverts H end.
 
 
+Lemma preservation_bridge:
+  forall Γ pc c c' m m' ev n,
+    -{ Γ , pc ⊢ c }- ->
+    〈c, m 〉 ⇨+/(SL, Γ, ev, S n) 〈c', m' 〉 ->
+    wf_mem m Γ ->
+    (wf_mem m' Γ  /\ (c' <> STOP -> -{ Γ , pc ⊢ c' }- )) .
+
+Proof.
+  intros.
+  dependent induction H0.
+
+  - invert_low_event_step.
+    forwards : preservation_event_step evt; eauto.
+
+  - invert_high_event_step.
+    forwards : preservation_event_step; eauto.
+
+  - invert_high_event_step.
+    destruct cfg' as [c'' m''].
+    forwards* (H_wf' & H_wt' ): preservation_event_step evt' c m c'' m''.
+    specializes* H_wt'.
+    replace n with (S (n - 1)) in * by omega.
+    specializes IHbridge_step_num c'' c' ___.
+Qed.    
+
+
+
 Lemma while_bridge_properties:
-  forall Γ n e c m ev c_end m_end, 
+  forall Γ n e c m ev c_end m_end,
     〈WHILE e DO c END, m 〉 ⇨+/(SL, Γ, ev, S n) 〈c_end, m_end 〉
     ->
     n > 0 /\
@@ -62,11 +93,11 @@ Proof.
     invert_high_steps.
     invert_step; intros; subst; splits~; try omega.
 Qed.
-    
 
 
 
-    
+
+
 Lemma if_bridge_properties:
   forall Γ n e c1 c2 m ev c_end m_end,
     〈IFB e THEN c1 ELSE c2 FI, m 〉 ⇨+/(SL, Γ, ev, S n) 〈c_end, m_end 〉
@@ -77,7 +108,7 @@ Lemma if_bridge_properties:
       \/
       ( (eval e m 0 ) /\ 〈c2, m 〉 ⇨+/(SL, Γ, ev, n) 〈c_end, m_end 〉)
     ).
-Proof.                                  
+Proof.
   intros.
   bridge_num_cases (inversion H) Case; subst.
 
@@ -119,7 +150,7 @@ Proof.
 Qed.
 
 
-Lemma assign_bridge_properties:       
+Lemma assign_bridge_properties:
   forall Γ n x e m ev c_end m_end,
     〈x ::= e, m 〉 ⇨+/(SL, Γ, ev, S n) 〈c_end, m_end 〉
     -> (exists v ℓ,
@@ -174,7 +205,7 @@ Lemma seq_comp_bridge_property:
         k < n /\ n  > 0 /\
        〈c1, m 〉 ⇨+/(SL, Γ, EmptyEvent, S k) 〈 STOP, m1' 〉
        /\ 〈c2, m1' 〉 ⇨+/(SL, Γ, ev, n - k ) 〈 c_end, m_end 〉
-    ). 
+    ).
 Proof.
   intros Γ n.
   induction n.
@@ -201,17 +232,17 @@ Proof.
    }
    Case "bridge_stop_num".
    {
-     repeat 
+     repeat
        match goal with
          | [ H : context [high_event_step] |- _ ] =>
            unfold high_event_step in H
-                                       
+
          | [ H : context [event_step _ _ 〈 c1;; c2, _  〉 _  ] |- _ ] =>
            inversion H; subst; clear H
-                                     
+
          | [ H : context [is_stop_config] |- _ ] =>
            inversion H; subst; clear H
-                                     
+
          | [ H : context [ _ = 〈 STOP, _ 〉] |- _ ] =>
            inversion H; clear H; contradiction
        end.
@@ -231,7 +262,7 @@ Proof.
        match goal with
          | [ H : context [high_event_step] |- _ ] =>
            unfold high_event_step in H
-                                       
+
          | [ H : context [event_step _ _ 〈 c1;; c2, _  〉 _  ] |- _ ] =>
            inversion H; subst; clear H
 
@@ -284,35 +315,4 @@ Proof.
     }
   }
 
-Qed.
-
-
-   
-Lemma is_not_stop_config_inversion:
-  forall c st,
-    is_not_stop_config 〈c, st 〉 ->
-    c <> STOP.
-  intros.
-  match goal with
-      [H : is_not_stop_config 〈 ?c, ?st 〉 |-  ?c <> STOP ] =>
-      (do 2 unfolds in H);
-        unfolds is_stop_config;
-        unfold not;
-        intros;
-        destruct H;
-        exists st;
-        congruence
-  end.
-Qed.
-
-
-   
-Lemma is_stop_config_inversion:
-  forall c st,
-    is_stop_config 〈c, st 〉 ->
-    c = STOP.
-  intros.
-  unfolds in H.
-  destruct H.
-  congruence.
 Qed.

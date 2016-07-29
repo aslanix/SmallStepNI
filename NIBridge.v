@@ -375,11 +375,10 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
 
 
       assert ( -{ Γ, pc ⊢ IFB e THEN c;; WHILE e DO c END ELSE SKIP FI }- ).
-      {
-        apply* T_If. 
-        apply* T_Seq. 
-        apply* T_While.  
-        apply* flowsto_sym.
+      { 
+        apply  T_If with ℓ pc'; auto.
+        applys* T_Seq.
+        apply T_While with ℓ pc'; auto.
         apply* T_Skip.
       }
 

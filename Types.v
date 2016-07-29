@@ -9,7 +9,7 @@ Require Import Identifier Environment.
 Require Import Imperative.
 
 
-                                     
+
 
 (* Type system *)
 
@@ -24,14 +24,14 @@ Proof.
 
 
   decide equality.
-Qed.  
-Hint Resolve eq_level_dec.  
+Qed.
+Hint Resolve eq_level_dec.
 
 
 
-Hint Resolve eq_exp_dec. 
+Hint Resolve eq_exp_dec.
 Hint Resolve eq_id_dec.
-  
+
 
 Tactic Notation "level_cases" tactic (first) ident (c):=
   first;
@@ -39,27 +39,28 @@ Tactic Notation "level_cases" tactic (first) ident (c):=
 
 
 
-Inductive flowsto: level -> level -> Prop := 
+Inductive flowsto: level -> level -> Prop :=
   | flowsto_sym: forall ℓ, flowsto ℓ ℓ
   | flowsto_ord: flowsto Low High.
+Hint Constructors flowsto.
 
 Notation "ℓ '⊑' ℓ'" := (flowsto ℓ ℓ') (at level 35).
 
 
-  
-  
+
+
 Definition typenv := @Env level.
 
 Reserved Notation "'{{' Γ '⊢' e ':' ℓ '}}'" (at level 0, Γ at level 50, e at level 99).
 Inductive exp_has_level : typenv -> exp -> level -> Prop :=
-  | T_Const : forall Γ n ℓ, 
+  | T_Const : forall Γ n ℓ,
       {{ Γ ⊢ ENum n : ℓ }}
-  | T_Id : forall Γ x ℓ, 
-      (Γ x) = Some ℓ -> 
+  | T_Id : forall Γ x ℓ,
+      (Γ x) = Some ℓ ->
       {{ Γ ⊢ EId x : ℓ  }}
-  | T_Plus : forall Γ e1 e2 ℓ, 
-      {{ Γ ⊢ e1 : ℓ }} -> 
-      {{ Γ ⊢ e2 : ℓ }} -> 
+  | T_Plus : forall Γ e1 e2 ℓ,
+      {{ Γ ⊢ e1 : ℓ }} ->
+      {{ Γ ⊢ e2 : ℓ }} ->
       {{ Γ ⊢ (EPlus e1 e2) : ℓ }}
   | T_Sub  : forall Γ e ℓ ℓ',
       {{ Γ ⊢ e : ℓ }} ->
@@ -69,7 +70,7 @@ where "'{{' Γ '⊢' e ':' ℓ '}}' " := (exp_has_level Γ e ℓ).
 
 
 Tactic Notation "exp_has_level_cases" tactic (first) ident (c) :=
- first; 
+ first;
  [Case_aux c "T_Const" | Case_aux c "T_Id" | Case_aux c "T_Plus"  | Case_aux c "T_Sub" ].
 
 
@@ -100,17 +101,17 @@ Inductive cmd_has_type : typenv -> level -> cmd -> Prop :=
      -{ Γ, pc' ⊢ c1 }- ->
      -{ Γ, pc' ⊢ c2 }- ->
      -{ Γ, pc  ⊢ IFB e THEN c1 ELSE c2 FI }-
- | T_While : forall Γ pc e ℓ pc' c, 
+ | T_While : forall Γ pc e ℓ pc' c,
      {{ Γ ⊢ e : ℓ }} ->
      ℓ ⊑ pc' ->
      pc ⊑ pc' ->
      -{ Γ, pc' ⊢ c }- ->
      -{ Γ, pc ⊢ WHILE e DO c END }-
-     
+
 where "'-{' Γ ',' pc '⊢' c '}-'" := (cmd_has_type Γ pc c).
 
 Tactic Notation "cmd_has_type_cases" tactic (first) ident (c) :=
- first; 
+ first;
  [
    (* Case_aux c "T_Stop" |  *)
    Case_aux c "T_Skip" | Case_aux c "T_Assign"  | Case_aux c "T_Seq"
@@ -126,7 +127,7 @@ Qed.
 
 
 (* TODO: move this to Types; 2016-07-26 *)
-Lemma wt_programs_are_not_stop: 
+Lemma wt_programs_are_not_stop:
   forall Γ pc c,
      -{ Γ, pc ⊢ c }- ->
      c <> STOP.
@@ -138,11 +139,10 @@ Qed.
 
 
 Ltac tt_wt_cmd_is_not_stop_save_name c H_new :=
-  match goal with 
+  match goal with
       [H : -{ _, _ ⊢ c }- |- _ ]
-            
+
       =>
       assert (H_new := H);
         apply wt_programs_are_not_stop in H; auto
   end.
-      

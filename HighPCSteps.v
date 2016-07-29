@@ -1,4 +1,4 @@
-(* 
+(*
 Properties of the computation when the program counter is high
 Author: Aslan Askarov
 File Created: 2016-07-26 (the content is from 2015)
@@ -15,7 +15,7 @@ Require Import Identifier Environment Imperative Types Augmented Bridge BridgePr
 Require Import WellFormedness LowEq. (* NIexp. *)
 Require Import InductionPrinciple.
 Require Import UtilTactics.
-Require Import BridgeTactics. 
+Require Import BridgeTactics.
 (* Require Import BridgeProperties. *)
 
 
@@ -23,11 +23,11 @@ Require Import BridgeTactics.
 
 
 Ltac tt_SSn_ne_1 :=
-            try match goal with 
+            try match goal with
               | [ H: S (S ?n) = 1|- _]  =>
                 assert (S (S n) <> 1) by omega;
                   contradiction
-                end.        
+                end.
 
 
 
@@ -44,7 +44,7 @@ Proof.
   intros Γ c m c_end s H_wt H H_wf.
   cmd_cases (dependent induction c) Case.
   Case "STOP".
-  {        
+  {
     tt_wt_cmd_is_not_stop_save_name STOP H_wt'; false.
   }
 
@@ -68,9 +68,9 @@ Proof.
     repeat
       match goal with
         | [ H : wf_mem _ Γ |- _] =>
-          unfold wf_mem in H; 
+          unfold wf_mem in H;
             destruct_conj; repeat specialize_gen
-        | [ H: exists _, _ x = Some _  |- _ ] => destruct H 
+        | [ H: exists _, _ x = Some _  |- _ ] => destruct H
       end.
 
     match goal with
@@ -79,7 +79,7 @@ Proof.
     end; auto.
     unfold update_st in *;   unfold update_env in *.
     inversion H_wt; subst.
-    assert (ℓ' = High) by (destruct ℓ'; crush); subst.    
+    assert (ℓ' = High) by (destruct ℓ'; crush); subst.
     destruct (eq_id_dec i x); subst.
     {
       assert (ℓ  = High) by (crush; auto).
@@ -91,7 +91,7 @@ Proof.
       subst.
       apply val_low_eq_refl.
     }
-  }  
+  }
   Case ";;".
   (* this is the only place where we will be using the IH? *)
   {
@@ -105,21 +105,13 @@ Proof.
   Case "IFB".
   {
     inversion H; apply state_low_eq_wf_refl; crush.
-  }    
+  }
   Case "WHILE".
   {
     inversion H; apply state_low_eq_wf_refl; crush.
   }
 Qed.
 
-Lemma empty_event_is_high :
-  forall Γ,
-  high_event Γ Low EmptyEvent.
-Proof.
-  intros.
-  do 2 unfolds; intros;
-  match goal with [H : context [low_event] |- _ ] => inverts H end.
-Qed.
 
 
 
@@ -131,7 +123,7 @@ Lemma high_pc_does_not_update_low_states_event_step:
     wf_mem m Γ
     -> state_low_eq Γ m s /\ high_event Γ Low e.
 Proof.
-  
+
   intros Γ e c m c_end s H_wt H H_wf.
   event_step_cases (dependent induction H) Case; subst;
 
@@ -140,7 +132,7 @@ Proof.
   let immediate_base_case :=
       (split;
        [ eapply high_pc_does_not_update_low_states; eauto |
-         apply empty_event_is_high])  
+         apply empty_event_is_high])
   in match goal with
        | [ H : context [SKIP] |- _ ] => immediate_base_case
        | [ H : context [ IFB _ THEN _ ELSE _ FI] |- _ ] => immediate_base_case
@@ -151,10 +143,10 @@ Proof.
          (* we consider the remaining base cases *)
        | _ => idtac
      end.
-  
+
   - Case "event_step_assign".
     split.
-    + eapply high_pc_does_not_update_low_states; eauto.      
+    + eapply high_pc_does_not_update_low_states; eauto.
     + unfolds. unfolds. intros.
       assert ( ℓ = High ).
       {
@@ -164,13 +156,13 @@ Proof.
       }
       subst.
       repeat
-        let H := 
+        let H :=
           match goal with
-            | [ H: context [low_event] |- _ ] => H 
-            | [ H: High ⊑ Low |- _ ] => H 
+            | [ H: context [low_event] |- _ ] => H
+            | [ H: High ⊑ Low |- _ ] => H
           end
         in inverts H.
-    
+
 Qed.
 
 
@@ -185,7 +177,7 @@ Proof.
   intro n; induction n; intros.
   -  invert_bridge_step_num.
      + invert_low_event_step.
-       
+
        _eapply_in_ctxt event_step high_pc_does_not_update_low_states_event_step; eauto.
        super_destruct.
        contradiction.
@@ -199,13 +191,13 @@ Proof.
   - match goal with | [H : context [bridge_step_num] |- _ ] => inverts H end.
     destruct cfg' as [c' m'].
     specialize (IHn Γ c' m' ev c_end m_end).
-    
-              
+
+
     match goal with [H : context [high_event_step ] |-_  ]=> inverts~ H end.
     assert (state_low_eq Γ m m')
       by (eapply high_pc_does_not_update_low_states_event_step; eauto).
-    
-    asserts [?H ?H] : (-{ Γ, High ⊢ c' }- /\ wf_mem m' Γ ). 
+
+    asserts [?H ?H] : (-{ Γ, High ⊢ c' }- /\ wf_mem m' Γ ).
     { (eapply preservation_event_step in H1; eauto;
        destruct H1 as [wf_m' H_non_stop];
        split; [eapply H_non_stop; eapply is_not_stop_config_inversion| idtac];

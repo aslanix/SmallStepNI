@@ -1,1 +1,1 @@
-((coq-mode . ((coq-prog-args . ("-emacs" "-R" "lib/" "Lib" )))))
+((coq-mode . ((coq-prog-args . ("-emacs" "-R" "." "NI" )))))

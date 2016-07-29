@@ -1,5 +1,6 @@
 -R . NI
 ./Augmented.v
+./Adequacy.v
 ./Bridge.v
 ./BridgeProperties.v
 ./BridgeTactics.v
@@ -17,3 +18,4 @@
 ./Types.v
 ./UtilTactics.v
 ./WellFormedness.v
+./NI.v
