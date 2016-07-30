@@ -10,27 +10,18 @@ Require Import Imperative Types.
 
 
 
-Inductive event := 
-  | EmptyEvent : event 
+Inductive event :=
+  | EmptyEvent : event
   | AssignmentEvent : level -> id -> nat -> event.
- 
+
 
 Lemma eq_event_dec: forall ev1 ev2: event, {ev1 = ev2} + { ev1<>ev2 }.
 Proof.
   decide equality.
   apply eq_nat_dec.
-Qed.  
-Hint Resolve eq_event_dec.  
+Qed.
+Hint Resolve eq_event_dec.
 
-
-
-
-(* lifiting reasoning about STOP to configurations *)
-
-Definition is_stop_config  cfg :=
-  exists m, cfg = 〈 STOP, m 〉.
-
-Definition is_not_stop_config cfg := ~ (is_stop_config cfg).
 
 
 (* Instrumented semantics. We decorate the semantic transition with
@@ -40,8 +31,8 @@ Definition is_not_stop_config cfg := ~ (is_stop_config cfg).
 
 
 Inductive event_step : typenv -> event -> config ->  config -> Prop :=
-  | event_step_assign: 
-      forall Γ ℓ x e v st st', 
+  | event_step_assign:
+      forall Γ ℓ x e v st st',
         〈 x ::= e,  st〉 ⇒ 〈STOP, st' 〉->
         Γ (x) = Some ℓ ->
         eval e st v ->
@@ -51,7 +42,7 @@ Inductive event_step : typenv -> event -> config ->  config -> Prop :=
       〈SKIP, st 〉 ⇒ 〈 STOP, st 〉 ->
        event_step Γ EmptyEvent 〈 SKIP, st 〉〈  STOP, st 〉
 
-  | event_empty_branch: forall Γ e c1 c2 c' st, 
+  | event_empty_branch: forall Γ e c1 c2 c' st,
      〈IFB e THEN c1 ELSE c2 FI, st 〉 ⇒ 〈  c', st 〉 ->
      c' <> STOP ->
      event_step Γ EmptyEvent 〈IFB e THEN c1 ELSE c2 FI, st 〉〈  c', st 〉
@@ -65,15 +56,15 @@ Inductive event_step : typenv -> event -> config ->  config -> Prop :=
   | event_step_seq1 : forall Γ ev c1 c1' c2 st st',
       event_step Γ ev 〈c1, st〉  〈 c1', st'〉  ->
       c1' <> STOP ->
-      event_step Γ ev 〈c1;;c2, st〉  〈c1';;c2, st'〉 
+      event_step Γ ev 〈c1;;c2, st〉  〈c1';;c2, st'〉
 
-  | event_step_seq2 : forall Γ ev c1 c2 st st', 
+  | event_step_seq2 : forall Γ ev c1 c2 st st',
                         c2 <> STOP ->
-      event_step Γ ev 〈c1, st  〉 〈 STOP, st' 〉  -> 
+      event_step Γ ev 〈c1, st  〉 〈 STOP, st' 〉  ->
       event_step Γ ev 〈c1;;c2, st 〉 〈c2, st' 〉 .
 
-      
-Tactic Notation "event_step_cases" tactic (first) ident (c) := 
+
+Tactic Notation "event_step_cases" tactic (first) ident (c) :=
  first;
  [ Case_aux c "event_step_assign" |
    Case_aux c "event_skip"        |
@@ -84,7 +75,7 @@ Tactic Notation "event_step_cases" tactic (first) ident (c) :=
    Case_aux c "event_step_seq2"   ].
 
 
-(* 
+(*
 Lemma is_not_stop_config_neg: forall st,
     is_not_stop_config 〈STOP, st 〉 -> False.
 Proof.
@@ -92,5 +83,5 @@ Proof.
   inversion H.
   apply H1.
   auto.
-Qed. 
+Qed.
 *)

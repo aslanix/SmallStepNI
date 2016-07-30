@@ -16,6 +16,8 @@ Require Import WellFormedness LowEq.
 Require Import InductionPrinciple.
 Require Import UtilTactics.
 
+Ltac invert_low_event:=
+        match goal with [ H: context [low_event _ _ EmptyEvent] |- _ ] => inversion H end.
 
 Ltac invert_low_steps :=
   repeat
@@ -39,6 +41,9 @@ Ltac invert_high_steps :=
 
 
 Ltac stop_contradiction:=
+  match goal with [H: context [is_stop] |- _ ] => repeat unfolds in H ; inverts H end.
+
+(*
       match goal with
       | [ H : context [is_not_stop_config 〈STOP, ?M 〉]|- _ ] =>
         unfold is_not_stop_config in H;
@@ -46,6 +51,9 @@ Ltac stop_contradiction:=
           assert (is_stop_config 〈STOP, M 〉) by ( exists M; crush);
           contradiction
     end.
+*)
+
+(*
 
 Ltac prove_is_not_stop_config:=
   unfold is_not_stop_config;
@@ -59,7 +67,7 @@ Ltac prove_is_not_stop_config:=
       )
   end.
 
-
+*)
 
 Ltac impossible_flows:=
   match goal with
@@ -101,14 +109,12 @@ Ltac _eapply_in_ctxt keyw what :=
 
 (* LEMMAS that go into Hints *)
 
-Lemma is_stop_trivial : forall m, is_stop_config 〈STOP, m 〉.
+Lemma is_stop_trivial : forall m, is_stop 〈STOP, m 〉.
             Proof.
               intros.
-              match goal with
-                | [ |- is_stop_config 〈STOP, ?m 〉 ] =>
-                unfolds; exists m; tauto
-              end.
-              Qed.
+              unfolds.
+              constructor.
+            Qed.
 
 Hint Resolve is_stop_trivial.
 
@@ -117,19 +123,17 @@ Hint Resolve is_stop_trivial.
 
 Lemma is_not_stop_config_inversion:
   forall c st,
-    is_not_stop_config 〈c, st 〉 ->
+    is_not_stop 〈c, st 〉 ->
     c <> STOP.
   intros.
-  match goal with
-      [H : is_not_stop_config 〈 ?c, ?st 〉 |-  ?c <> STOP ] =>
-      (do 2 unfolds in H);
-        unfolds is_stop_config;
-        unfold not;
-        intros;
-        destruct H;
-        exists st;
-        congruence
-  end.
+  unfolds.
+  intros.
+  unfolds in H.
+  unfolds in H.
+  subst.
+  destruct H.
+  unfolds.
+  auto.
 Qed.
 
 Hint Resolve is_not_stop_config_inversion.
@@ -137,12 +141,13 @@ Hint Resolve is_not_stop_config_inversion.
 
 Lemma is_stop_config_inversion:
   forall c st,
-    is_stop_config 〈c, st 〉 ->
+    is_stop 〈c, st 〉 ->
     c = STOP.
   intros.
   unfolds in H.
-  destruct H.
-  congruence.
+  unfolds in H.
+  auto.
+
 Qed.
 
 Hint Resolve is_stop_config_inversion.
@@ -176,7 +181,7 @@ Hint Resolve bridge_steps_are_positive.
 Lemma is_non_stop_config_trivial:
          forall c st,
            c <> STOP ->
-           is_not_stop_config 〈c, st 〉.
+           is_not_stop 〈c, st 〉.
 Proof.
          intros.
          do 2 unfolds.
@@ -224,3 +229,47 @@ Proof.
   impossible_flows.
 Qed.
 Hint Resolve high_assignments_are_high_events.
+
+
+
+
+Ltac stop_contradiction_more:=
+  match goal with
+    | [ H: is_stop 〈?C, ?M 〉, H' : ?C <> STOP |- _ ] =>
+      inverts*  H
+  end.
+
+Lemma stop_contradiction_more_lemma :
+  forall c m, is_stop 〈c, m 〉 -> c <> STOP -> False.
+Proof.
+  intros.
+  stop_contradiction_more.
+Qed.
+
+Hint Resolve stop_contradiction_more_lemma.
+
+
+Ltac stop_contradiction_alt :=
+  match goal with [ H : is_not_stop 〈 STOP, ?m 〉 |- _ ] =>
+    do 2 unfolds in H;
+    assert (cmd_of 〈STOP, m 〉 = STOP ) by 
+    (
+      unfolds;
+      auto
+    );
+    specialize_gen;
+    exfalso;
+    assumption
+  end.
+
+Lemma stop_contradiction_alt_lemma_exf :
+  forall m,  is_not_stop 〈 STOP, m 〉 -> False.
+Proof.
+  intros.
+  stop_contradiction_alt.
+Qed.
+
+Hint Resolve stop_contradiction_alt_lemma_exf.
+
+Ltac invert_step:=
+  match goal with [H : context[step] |- _ ] => inverts H end.

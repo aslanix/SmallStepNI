@@ -83,6 +83,7 @@ Ltac specialize_gen:=
 
   end.
 
+Ltac specialize_gens := specialize_gen; subst~ .
 
 
 Ltac cleanup := subst; subst_trivial; clear_impossible.
@@ -111,6 +112,6 @@ Ltac destruct_exists :=
                    end.
 
 Ltac clear_trivial:=
-          match goal with 
+          match goal with
             | [ H: ?X = ?X |- _ ] => clear H
           end.

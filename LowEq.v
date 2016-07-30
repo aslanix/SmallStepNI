@@ -353,3 +353,13 @@ Proof.
                 assert (state_low_eq Γ m' m) by  (eapply state_low_eq_sym; assumption).
                 apply (state_low_eq_trans H3 H2).
 Qed.
+
+
+(* configuration low-equivalence *)
+
+Definition config_low_eq (Γ:typenv) cfg cfg' :=
+  match cfg, cfg' with
+    | Config c m, Config c' m' => c = c' /\ state_low_eq Γ m m'
+  end.
+
+Hint Unfold config_low_eq.

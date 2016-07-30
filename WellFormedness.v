@@ -51,6 +51,95 @@ Definition wf_mem (m:state )  ( Γ: typenv): Prop :=
  (forall  x ℓ, Γ x = Some ℓ -> exists u, m x = Some u).
 
 
+Definition wt_cfg (cfg: config) ( Γ: typenv) (pc: level): Prop :=
+  match cfg with
+    | Config c m => wf_mem m Γ /\ ( c <> STOP -> -{ Γ, pc ⊢ c }- )
+  end.
+
+
+Notation  "'={' Γ ',' pc '⊢' cfg '}='" := 
+  (wt_cfg cfg Γ pc ) (at level 40).
+
+Local Hint Resolve eq_nat_dec.
+
+(* TODO : move this hint someplace else *) 
+Hint Extern 4 (_ <> STOP) => let X:= fresh in unfolds; intros X; inverts X. 
+
+Theorem preservation_cfg:
+  forall Γ pc cfg cfg',
+    ={ Γ, pc ⊢ cfg }= ->
+    cfg ⇒ cfg' ->
+    ={ Γ, pc ⊢ cfg'}= .
+
+Proof.
+  intros Γ pc [c m] [c' m'] [H_wt ?H] H_step.
+  cmd_cases (dependent induction c) Case.
+  Case "STOP". inversion H_step.
+  Case "SKIP". inversion H_step; subst~ ; split *.
+  Case "::=". 
+  {
+    inverts H_step.
+    specializes* H.
+
+    splits*.
+    splits*.
+    - intros. compare i x; eauto; intros; subst.
+      + inverts*  H.
+      + unfolds wf_mem.
+        destruct H_wt as [H_wf_mem ?].
+        assert (m x = Some u).
+        {
+          unfolds update_st. unfold update_env in *.
+          destruct eq_id_dec; subst*.
+        }
+        specializes H_wf_mem x u __.
+    - intros.
+      compare i x; intros; subst*.
+      + (exists v).
+        unfold update_st.
+        unfold update_env.
+        destruct eq_id_dec; subst* .
+      + unfold wf_mem in H_wt.
+        destruct H_wt as [? ?H_wt_mem].
+        unfold update_st.
+        unfold update_env.
+        destruct eq_id_dec; subst*.
+  }
+  Case ";;".
+  {
+    specializes* H.
+    inverts* H.
+    inverts* H_step.
+    - specializes* IHc1.
+      lets (X & Y): IHc1.
+      specialize_gens.
+      econstructor; intros; eauto.
+      constructor; auto.
+    - specializes* IHc1.
+      lets (X & Y): IHc1.
+      unfolds. split*.
+  }
+  Case "IFB".
+  {
+    specializes* H.
+    inverts* H.
+    inverts* H_step;
+      split*;
+      intros;
+      applys* pc_lowering.
+  }
+  Case "WHILE".
+  {
+    specializes *H.
+    inverts *H.
+    inverts* H_step.
+    split*; intros.
+    apply T_If with (ℓ:=ℓ) (pc' := pc'); repeat constructor; auto. 
+    apply T_While with (ℓ:=ℓ) (pc' := pc'); repeat constructor; auto.
+  }
+Qed.
+
+
 Theorem preservation:
   forall Γ c m c' m' pc,
     -{ Γ, pc ⊢ c}- ->
@@ -59,103 +148,38 @@ Theorem preservation:
     wf_mem m' Γ /\ ( c' <> STOP -> -{Γ, pc ⊢ c'}- ).
 Proof.
   intros Γ c m c' m' pc H_wt H H_wf.
-  cmd_cases (dependent induction c) Case.
-  Case "STOP".
-  {
-    inversion H.
-  }
-  Case "SKIP".
-  {
-    inversion H.
-    subst; auto.
-    split.
-    auto.
-    crush.
-  }
-  Case "::=".
-  {
-    inversion H.
-    inversion H_wt.
-    subst.
-    split; [idtac | crush].
-    unfold wf_mem in *.
-    split.
-    {
-      intros.
-      unfold update_st; unfold update_env.
-      destruct H_wf as [ H_wf' H_wf''].
-
-      compare i x; try apply eq_nat_dec; intros.
-      {
-        rewrite -> e0 in *.
-        exists ℓ'.
-        auto.
-      }
-      {
-        unfold wf_mem in *.
-        specialize (H_wf' x u).
-        unfold update_st in *; unfold update_env in *.
-        destruct eq_id_dec. crush.
-        specialize (H_wf' H0).
-        auto.
-      }
-
-    }
-    {
-      intros.
-      unfold update_st; unfold update_env.
-      destruct H_wf as [ H_wf' H_wf''].
-      compare i x; try apply eq_nat_dec; intros.
-      {
-        exists v.
-        destruct eq_id_dec; crush.
-      }
-      {
-        specialize (H_wf'' x ℓ0).
-        unfold update_st in *; unfold update_env in *.
-        destruct eq_id_dec; crush.
-      }
-    }
-  }
-  Case ";;".
-  {
-    inversion H_wt.
-    inversion H; auto; subst.
-
-
-    {
-      specialize (IHc1 m c1' m' pc H4 H8 H_wf);
-      split; crush.
-      intros.
-      apply T_Seq; auto.
-    }
-    {
-      specialize (IHc1 m STOP m' pc H4 H7 H_wf); crush.
-    }
-  }
-  Case "IFB".
-  {
-    inversion H_wt;
-    inversion H; subst;
-
-      split; auto;
-
-      intros;
-      apply pc_lowering with (pc' := pc'); auto.
-  }
-  Case "WHILE".
-  {
-    inversion H_wt; inversion H; subst.
-    split; auto.
-    intros.
-    apply T_If with (ℓ:=ℓ) (pc' := pc'); auto; try constructor; auto.
-    apply T_While with (ℓ:=ℓ) (pc' := pc'); auto; try constructor; auto.
-
-  }
+  forwards* : preservation_cfg.
+  unfolds.
+  split *.
 Qed.
 
-
 (* liftings of preservation to various relations. *)
+
+
+Lemma event_step_inversion:
+  forall Γ ev cfg cfg',
+    event_step Γ ev cfg cfg' ->
+    step cfg cfg'.
+Proof.
+  intros.
+  dependent induction H; auto; repeat (constructor; auto).
+
+Qed.    
+
+Hint Rewrite event_step_inversion.
+
+Lemma preservation_evt_cfg:
+  forall Γ evt pc cfg cfg',
+  ={ Γ, pc ⊢ cfg }= ->
+  event_step Γ evt cfg cfg' ->
+  ={ Γ, pc ⊢ cfg'}= .
+
+Proof.
+  intros.
+  forwards* : event_step_inversion.
+  applys* preservation_cfg.
+Qed.
+
 
 Lemma preservation_event_step:
   forall Γ e c m c' m' pc,
@@ -165,20 +189,7 @@ Lemma preservation_event_step:
     wf_mem m' Γ /\ ( c' <> STOP -> -{Γ, pc ⊢ c'}- ).
 Proof.
   intros.
-  dependent induction H0; subst;
-  try
-    match goal with
-      | [ H : 〈?C, ?M 〉 ⇒ 〈?C', ?M' 〉, H': wf_mem ?M Γ |- _ ] =>
-        apply preservation with (c := C) (m := M); auto
-    end.
-  {
-    inversion H; subst.
-    repeat specialize_gen; crush; constructor;crush.
-  }
-  {
-    specialize (IHevent_step STOP m').
-    inversion H.
-    crush.
-  }
-
+  forwards * : preservation_evt_cfg.
+  unfolds.
+  split *.
 Qed.

@@ -92,7 +92,6 @@ Proof.
     exists EmptyEvent.
     inverts keep H1.
     constructor~ .
-    crush.
   }
 Qed.
 

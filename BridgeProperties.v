@@ -23,6 +23,11 @@ Require Import BridgeTactics.
 
 
 
+(* TODO : move these lemmas outside *)
+
+
+
+
 (* 2016-07-25
    - auxiliarly ltac to deal with inductive cases
       (when inducting over n in bridge definition)
@@ -32,18 +37,8 @@ Require Import BridgeTactics.
 
 
 Ltac bridge_inductive_impossible_aux H:=
-    intros; inversion H; subst; invert_high_steps; stop_contradiction.
+    intros; inversion H; subst; invert_high_steps; eauto; stop_contradiction_alt.
 
-
-
-Ltac stop_contradiction_more:=
-  match goal with
-    | [ H: is_stop_config 〈?C, ?M 〉, H' : ?C <> STOP |- _ ] =>
-      inversion H; congruence
-  end.
-
-Ltac invert_step:=
-  match goal with [H : context[step] |- _ ] => inverts H end.
 
 
 Lemma preservation_bridge:
@@ -88,7 +83,8 @@ Proof.
     invert_high_steps.
     exfalso.
     invert_step.
-    stop_contradiction_more.
+    auto.
+    
   - Case "bridge_trans_num".
     invert_high_steps.
     invert_step; intros; subst; splits~; try omega.
@@ -118,7 +114,7 @@ Proof.
   - Case "bridge_stop_num".
     + invert_high_steps.
       * exfalso.
-        {  - invert_step;  stop_contradiction_more. }
+        {  - invert_step; stop_contradiction_more. }
 
   -  Case "bridge_trans_num".
      + invert_high_steps.
@@ -129,6 +125,21 @@ Qed.
 
 
 
+Lemma is_not_stop_trivial_exf: forall m,
+                                 is_not_stop 〈STOP, m 〉 -> False.
+
+Proof.
+  intros.
+  unfolds in H.
+  unfolds in H.
+  assert ( cmd_of 〈STOP, m 〉= STOP). 
+  auto.
+  specialize_gen.
+  assumption.
+Qed.  
+
+Hint Resolve is_not_stop_trivial_exf.
+
 Lemma skip_bridge_properties:
   forall Γ n m ev c_end m_end,
     〈SKIP, m 〉 ⇨+/(SL, Γ, ev, S n) 〈c_end, m_end 〉->
@@ -137,19 +148,22 @@ Proof.
   intros Γ n; induction n.
   {
     intros.
-    match goal with | [ H : context [bridge_step_num] |- _ ] => inversion H end.
-    invert_low_steps.
-    invert_high_steps.
-    repeat (split; auto).
-    omega.
+    invert_bridge_step_num.
+    - invert_low_steps.
+    - invert_high_steps.
+      splits~ .
+    - omega.
   }
   (* inductive case *)
   {
+    
     bridge_inductive_impossible_aux H.
+    
   }
 Qed.
 
 
+    
 Lemma assign_bridge_properties:
   forall Γ n x e m ev c_end m_end,
     〈x ::= e, m 〉 ⇨+/(SL, Γ, ev, S n) 〈c_end, m_end 〉
@@ -171,7 +185,7 @@ Proof.
   inversion H; [ invert_low_steps | invert_high_steps | omega ]; split; auto;
   repeat
     match goal with
-      | [ H: context [step] |- _ ] => (inversion H; subst; clear H )
+      | [ H: context [step] |- _ ] => (inverts  H;  clear H )
       | [ H: Γ x = Some ?L, H': eval _ _ ?V |- exists _ _, _] =>
         (exists V L)
       | [ _ : eval ?E ?M ?V1, H' : eval ?E ?M ?V2 |- _ ] =>
@@ -232,6 +246,7 @@ Proof.
    }
    Case "bridge_stop_num".
    {
+     
      repeat
        match goal with
          | [ H : context [high_event_step] |- _ ] =>
@@ -240,8 +255,8 @@ Proof.
          | [ H : context [event_step _ _ 〈 c1;; c2, _  〉 _  ] |- _ ] =>
            inversion H; subst; clear H
 
-         | [ H : context [is_stop_config] |- _ ] =>
-           inversion H; subst; clear H
+         | [ H : context [is_stop] |- _ ] =>
+           do 2 unfolds in H; inverts* H
 
          | [ H : context [ _ = 〈 STOP, _ 〉] |- _ ] =>
            inversion H; clear H; contradiction
@@ -283,8 +298,7 @@ Proof.
         exists c1_end.
         compare c1_end STOP; intros;
         repeat (specialize_gen; subst; split; auto);
-        apply bridge_trans_num with evt' 〈c1', st' 〉;auto;
-        first [constructor | prove_is_not_stop_config]; auto.
+        apply bridge_trans_num with evt' 〈c1', st' 〉; eauto.
       }
       {
         super_destruct.
@@ -294,8 +308,7 @@ Proof.
         end.
         right; exists m1_end (S k).
         repeat (split || auto || omega).
-        apply bridge_trans_num with evt' 〈c1', st' 〉;
-        repeat (auto || omega || constructor || assumption || prove_is_not_stop_config ).
+        apply bridge_trans_num with evt' 〈c1', st' 〉; eauto.
       }
     }
     {
@@ -306,9 +319,9 @@ Proof.
       split.
       omega.
       split.
-      apply bridge_stop_num with evt';
-        repeat (constructor || assumption).
-      unfold is_stop_config; exists st'; auto.
+      apply bridge_stop_num with evt'; eauto.
+      
+      unfolds is_not_stop;
       assert (( S n) - 0 = S n ) as X  by omega.
       rewrite X.
       assumption.
@@ -316,3 +329,46 @@ Proof.
   }
 
 Qed.
+
+
+
+Lemma event_low_eq_empty:
+  forall Γ,
+    event_low_eq Γ EmptyEvent EmptyEvent.
+Proof.                            
+  intros.
+  unfolds.
+  repeat (splits; auto).
+Qed.  
+Hint Resolve event_low_eq_empty.
+
+Lemma event_low_eq_high:
+  forall Γ x v y u,
+    event_low_eq Γ (AssignmentEvent High x v) (AssignmentEvent High y u).
+
+Proof.
+  intros; unfolds.
+  repeat split; intros; inversion H; impossible_flows.
+Qed.
+
+Hint Resolve event_low_eq_high.
+
+Lemma event_low_eq_low:
+  forall Γ x v,
+    event_low_eq Γ (AssignmentEvent Low x v) (AssignmentEvent Low x v).
+Proof.
+  intros.
+  unfolds.
+  repeat split; auto.
+Qed.      
+
+Hint Resolve event_low_eq_low.
+
+Lemma config_low_eq_trivial:
+  forall Γ m s c,
+    state_low_eq Γ m s ->
+    config_low_eq Γ 〈 c, m 〉 〈c, s 〉.
+Proof.
+  intros; constructor; auto.
+Qed.  
+Hint Resolve config_low_eq_trivial.

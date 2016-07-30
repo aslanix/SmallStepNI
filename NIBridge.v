@@ -12,15 +12,9 @@ Require Import BridgeTactics.
 Require Import BridgeProperties.
 Require Import HighPCSteps.
 
+(* TODO: move these to LowEq? *)
 
-
-
-
-
-
-
-
-
+        
 Definition NI_idx (n: nat): Prop :=
   forall Γ pc c,
     -{ Γ, pc ⊢ c }- ->
@@ -31,6 +25,7 @@ Definition NI_idx (n: nat): Prop :=
       state_low_eq Γ m2 s2 /\ c2 = d2 /\
       (low_event Γ Low ev1 <-> low_event Γ Low ev2)
       /\  (low_event Γ Low ev1 -> ev1 = ev2).
+
 
 
 
@@ -47,16 +42,17 @@ Proof.
 
     Case "T_Skip".
     {
-       repeat match goal
-             with
-               | [ H : context [bridge_step_num] |- _ ] =>
-                 apply skip_bridge_properties in H
-       end;
-       crush.
+      forwards H_a: skip_bridge_properties H_m.
+      forwards H_b: skip_bridge_properties H'_s.
+      destructs H_a.
+      destructs H_b.
+      subst.
+      splits *.
     }
     Case "T_Assign".
     {
       (* clean up; gathering what we know about assignments *)
+      
       repeat
         (match goal with
              | [ H: context [bridge_step_num] |- _ ] =>
@@ -64,40 +60,28 @@ Proof.
              |  [ H: Γ x = Some ?U, H' : Γ x = Some ?V |- _ ] =>
                 (assert (U = V) by congruence; subst; clear H)
          end).
-
-      repeat match goal with
-        | [  H:  {{Γ ⊢ e : ℓ}},
-                 _ : eval e m ?X1,
-                     _ : eval e s ?X2,
-                         _ : Γ x = Some ?ℓ'
-             |- _] =>
-          (* this case considers the main reasoning :
-             - low-equivalences, memory updates, ni for expressions
-           *)
-          ( assert (val_low_eq ℓ' X1 X2) as LE
-              by (apply low_eq_flowsto with ℓ; auto; apply ni_exp with Γ m s e; auto);
-            apply leq_updates with ( ℓ := ℓ') (x:= x) (u := X1) ( v:= X2) in leq; auto;
-            repeat (split; auto);
-            clear H
-          )
-        | [ H: val_low_eq ?ℓ' _ _  |- _] =>
-          (* secondary clauses about event equivalence; mechanical *)
-            destruct ℓ'; inversion H; subst;
-              assert (Low ⊑ Low) by constructor;
-              assert ( ~ High ⊑ Low) by (unfold not; intros H''; inversion H'');
-              repeat specialize_gen; subst; auto; clear H
+      
+      (* use NI for expressions *)
+      forwards* low_eq: ni_exp.
+      match goal with
+          [ _ : Γ x = Some ?ℓ' |- _ ] =>
+          (forwards* LE : low_eq_flowsto __ ℓ' low_eq;
+           clear low_eq;
+           rename ℓ' into ℓ_x)
       end.
+      forwards* st_eq: leq_updates.
+        
+      splits *; (* the main goal is in the hypothesis by now *)
+        (* these take care of the last two technical goals *)
+        clear st_eq;
+        assert (Low ⊑ Low) by auto;
+        assert ( ~ High ⊑ Low) by  (unfold not; intros H''; inversion H'');
+        destruct ℓ_x; inverts* LE; 
+        repeat specialize_gen; subst*.
     }
     Case "T_Seq".
     {
-      apply seq_comp_bridge_property in H_m.
-      apply seq_comp_bridge_property in H'_s.
-
-      super_destruct.
-      (* the above destruct gives us four cases; only one is possible *)
-
       (* auxiliary Ltac to apply the IH *)
-
       Ltac apply_seq_comp_base_IH c1 m s IH leq:=
           match goal with
             | [ H : 〈c1, m 〉 ⇨+/(SL, ?Γ , ?ev1, _) 〈?C1, ?M 〉,
@@ -105,33 +89,30 @@ Proof.
               => specialize (IH m s ev1 ev2 C1 C2 M S n' leq H H_alt)
           end.
 
-      (* we now consider the four cases mentioned above *)
-      {
-        (* this is the only possible case, we get it from the IH *)
+      
+      apply seq_comp_bridge_property in H_m.
+      apply seq_comp_bridge_property in H'_s.
+
+      super_destruct; try (solve [omega]).
+      (* the above destruct gives us four cases; two are discharged by
+         omega; of the remaining two only one is possible *)
+
+      - (* this is the only possible case, we get it from the IH *)
+
         apply_seq_comp_base_IH c1 m s IHcmd_has_type1 leq.
         super_destruct;
-          repeat (split; auto).
-        compare x STOP;intros;
-        repeat (specialize_gen; subst); auto.
-      }
-      {
-        (* impossible *)
-        assert False by omega; contradiction.
-      }
-      {
-        (* impossible after applying the IH because ev1 is low?  *)
+          (splits ~) ;
+          compare x STOP;intros; 
+          repeat (specialize_gens).
+        
+      - (* impossible after applying the IH because ev1 is low?  *)
         apply_seq_comp_base_IH c1 m s IHcmd_has_type1 leq.
-
         super_destruct.
-        specialize_gen.
-        subst.
-        match goal with [ H: context [low_event _ _ EmptyEvent] |- _ ] => inversion H end.
+        specialize_gens.
+        invert_low_event.
+        
       }
-      {
-        (* impossible *)
-        assert False by omega; contradiction.
-      }
-    }
+
 
     (* neither if or while are possible in base case
        we use the following auxiliary ltac to discharge the goals *)
@@ -141,7 +122,7 @@ Proof.
       repeat match goal with
         | [ H : context [low_event_step] |- _ ] => invert_low_steps
         | [ H : context [high_event_step] |- _] => (invert_high_steps; subst)
-        | [ H: context [is_stop_config] |-  _ ] => (unfold is_stop_config in H; destruct H)
+        | [ H: context [is_stop] |-  _ ] => (do 2 unfolds in H; inverts * H)
         | [ H : 〈 _, _  〉 = 〈STOP, _ 〉 |- _] => (inversion H ; contradiction)
         | [ H : 0 >= 1 |- _ ] => omega
       end.
@@ -171,14 +152,14 @@ Proof.
       inversion H_m.
       invert_high_steps.
       intros.
-      stop_contradiction.
+      stop_contradiction_alt.
     }
     Case "T_Assign".
     {
       (* impossible *)
       inversion H_m.
       invert_high_steps.
-      stop_contradiction.
+      stop_contradiction_alt.
     }
     Case "T_Seq".
     {
@@ -197,9 +178,9 @@ Proof.
         (* LL *)
         apply_seq_comp_base_IH c1  m s IHH_wt1 leq.
         super_destruct;
-          repeat (split; auto).
+          repeat (split~).
         compare x STOP; intros;
-        repeat (specialize_gen; subst); auto.
+        repeat (specialize_gens).
         (* TODO: this boilerplate is similar to the LL case in the base case of the proof; consider
            generalizing; 2016-07-25; aa *)
       }
@@ -220,12 +201,12 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
 
       {
         (* RL *)
-        (* impossible - show via applying outer IH *)
+        (* impossible - show via applying the outer IH *)
         apply_seq_comp_ind_IH H c1 leq.
         super_destruct.
         match goal with [ H: context [ _ <-> _ ] |- _ ] => destruct H end.
         specialize_gen.
-        match goal with [H : low_event _ _ EmptyEvent |- _ ] => inversion H end.
+        invert_low_event.
       }
       {
         (* LR *)

@@ -23,6 +23,12 @@ Hint Unfold high_event_step.
 Hint Unfold low_event_step.
 
 
+Definition event_low_eq Γ ev1 ev2 :=
+     (low_event Γ Low ev1 <-> low_event Γ Low ev2)
+      /\  (low_event Γ Low ev1 -> ev1 = ev2).
+Hint Unfold event_low_eq.
+
+
 Inductive bridge_step_num:
   typenv -> level -> config -> config -> event -> nat -> Prop :=
 | bridge_low_num:
@@ -32,13 +38,13 @@ Inductive bridge_step_num:
 | bridge_stop_num:
     forall Γ ℓ evt cfg cfg',
       high_event_step Γ ℓ evt cfg cfg' ->
-      is_stop_config cfg' ->
+      is_stop cfg' ->
       bridge_step_num Γ ℓ cfg cfg' EmptyEvent 1
 | bridge_trans_num:
     forall Γ ℓ evt' evt'' cfg cfg' cfg'' n,
       n >=1 ->
       high_event_step Γ ℓ evt' cfg cfg' ->
-      is_not_stop_config cfg' ->
+      is_not_stop cfg' ->
       bridge_step_num Γ ℓ  cfg' cfg'' evt''  n ->
       bridge_step_num Γ ℓ  cfg cfg'' evt'' (S n).
 
@@ -179,3 +185,9 @@ Proof.
     (exists (S n)).
     econstructor; eauto.
 Qed.
+
+
+
+
+
+
