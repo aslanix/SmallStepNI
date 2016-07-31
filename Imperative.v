@@ -112,26 +112,22 @@ Definition cmd_of cfg :=
   match cfg with
     | Config c _ => c
   end.
+Hint Unfold cmd_of.
 
 Definition state_of cfg :=
   match cfg with
     | Config _ m => m
   end.
-
-Definition is_stop cfg := cmd_of cfg = STOP.
-Definition is_not_stop cfg := cmd_of cfg <> STOP.
-
-
+Hint Unfold state_of.
 
 (* lifiting reasoning about STOP to configurations *)
 
-(*
-Definition is_stop_config  := is_stop
+Definition is_stop cfg := cmd_of cfg = STOP.
+Hint Unfold is_stop.
+Definition is_not_stop cfg := cmd_of cfg <> STOP.
+Hint Unfold is_not_stop.
 
 
-Definition is_not_stop_config  := is_not_stop
-
-*)
 
 
 Inductive step : config -> config -> Prop :=

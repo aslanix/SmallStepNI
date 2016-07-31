@@ -9,6 +9,7 @@ Definition empty_env {X : Type} : @Env X :=
 
 Definition update_env {X : Type} (st: @Env X) (x: id) (n: X) : @Env X:=
  fun x' => if eq_id_dec x x' then (Some n) else st x'.
+Hint Unfold update_env.
 
 Ltac update_destruct := intros; unfold update_env; destruct eq_id_dec; crush.
 

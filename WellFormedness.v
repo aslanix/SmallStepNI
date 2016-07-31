@@ -29,18 +29,18 @@ Lemma pc_lowering:
           -{ Γ, pc' ⊢ c}- -> pc ⊑ pc' -> -{ Γ, pc ⊢ c}-.
 Proof.
   intros.
-  dependent induction H; try constructor; crush.
+  dependent induction H; try constructor; eauto.
   {
     apply T_Assign with (ℓ := ℓ) (ℓ' := ℓ') ;auto.
-    destruct pc0, ℓ', pc; crush.
+    destruct pc0, ℓ', pc; eauto.
   }
   {
     apply T_If with (ℓ := ℓ) (pc' := pc'); auto.
-    destruct pc', pc0, pc; crush.
+    destruct pc', pc0, pc; eauto.
   }
   {
     apply T_While with (ℓ := ℓ) (pc' := pc'); auto.
-    destruct pc', pc0, pc; crush.
+    destruct pc', pc0, pc; eauto.
   }
 Qed.
 
@@ -55,8 +55,8 @@ Definition wt_cfg (cfg: config) ( Γ: typenv) (pc: level): Prop :=
   match cfg with
     | Config c m => wf_mem m Γ /\ ( c <> STOP -> -{ Γ, pc ⊢ c }- )
   end.
-
-
+Hint Unfold wt_cfg.
+     
 Notation  "'={' Γ ',' pc '⊢' cfg '}='" := 
   (wt_cfg cfg Γ pc ) (at level 40).
 

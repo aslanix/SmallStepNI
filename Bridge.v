@@ -59,13 +59,6 @@ Tactic Notation "bridge_num_cases" tactic(first) ident(c) :=
 Notation " t '⇨+/(SL,' Γ ',' obs ',' n ')'  t' " :=
   (bridge_step_num Γ Low t t' obs n) (at level 40).
 
-Definition bridge_step Γ ℓ  evt cfg cfg' :=
-  exists n, bridge_step_num Γ ℓ  evt cfg cfg' (S n).
-
-
-Notation " t '⇒+/(SL,' Γ ',' obs ')'  t' " :=
-  (bridge_step Γ Low t t' obs) (at level 40).
-
 
 (* Multi-step reduction *)
 
@@ -185,9 +178,4 @@ Proof.
     (exists (S n)).
     econstructor; eauto.
 Qed.
-
-
-
-
-
 
