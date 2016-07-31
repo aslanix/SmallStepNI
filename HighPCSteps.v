@@ -171,7 +171,7 @@ Lemma high_pc_bridge:
             forall n Γ c m ev c_end m_end,
               -{ Γ, High ⊢ c }- ->
               wf_mem m Γ ->
-              〈c, m 〉 ⇨+/(SL, Γ, ev, S n) 〈c_end, m_end 〉->
+              〈c, m 〉 ⇨+/(SL, Γ, ev,  n) 〈c_end, m_end 〉->
               state_low_eq Γ m m_end /\ c_end = STOP /\ high_event Γ Low ev.
 Proof.
   intro n; induction n; intros.
@@ -187,7 +187,7 @@ Proof.
          super_destruct; auto.
        * eapply is_stop_config_inversion; eauto.
        * apply empty_event_is_high.
-     + omega.
+
   - match goal with | [H : context [bridge_step_num] |- _ ] => inverts H end.
     destruct cfg' as [c' m'].
     specialize (IHn Γ c' m' ev c_end m_end).

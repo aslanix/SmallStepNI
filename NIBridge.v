@@ -1,6 +1,10 @@
+
+
 Require Import Bool Arith List CpdtTactics SfLib LibTactics.
 Require Import Coq.Program.Equality.
 Require Import Omega.
+
+
 
 Set Implicit Arguments.
 
@@ -20,7 +24,7 @@ Definition NI_idx (n: nat): Prop :=
     forall m s ev1 ev2 c2 d2 m2 s2 n',
       state_low_eq Γ m s ->
       〈c, m〉⇨+/(SL, Γ, ev1, n ) 〈c2, m2〉->
-      〈c, s〉⇨+/(SL, Γ, ev2, S n') 〈d2, s2〉->
+      〈c, s〉⇨+/(SL, Γ, ev2, n') 〈d2, s2〉->
       state_low_eq Γ m2 s2 /\ c2 = d2 /\
       (low_event Γ Low ev1 <-> low_event Γ Low ev2)
       /\  (low_event Γ Low ev1 -> ev1 = ev2).
@@ -29,7 +33,7 @@ Definition NI_idx (n: nat): Prop :=
 
 
 Theorem ni_bridge_num:
-  forall n, NI_idx (S n).
+  forall n, NI_idx (n).
 Proof.
   apply strongind.
   (* Base case *)
@@ -84,7 +88,7 @@ Proof.
       Ltac apply_seq_comp_base_IH c1 m s IH leq:=
           match goal with
             | [ H : 〈c1, m 〉 ⇨+/(SL, ?Γ , ?ev1, _) 〈?C1, ?M 〉,
-                    H_alt : 〈c1, s 〉 ⇨+/(SL, _ , ?ev2, S ?n') 〈?C2, ?S 〉 |- _ ]
+                    H_alt : 〈c1, s 〉 ⇨+/(SL, _ , ?ev2, ?n') 〈?C2, ?S 〉 |- _ ]
               => specialize (IH m s ev1 ev2 C1 C2 M S n' leq H H_alt)
           end.
 
@@ -117,7 +121,7 @@ Proof.
        we use the following auxiliary ltac to discharge the goals *)
 
     Ltac discharge_if_while_base H :=
-      bridge_num_cases (inversion H) SCase; subst;
+      (inverts H);
       repeat match goal with
         | [ H : context [low_event_step] |- _ ] => invert_low_steps
         | [ H : context [high_event_step] |- _] => (invert_high_steps; subst)
@@ -189,8 +193,8 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
 
           | [ H: context [?X < S ?n] |- _ ]=>
             assert (X <= n) by omega; clear H
-          | [ H_m : 〈c1, ?m 〉 ⇨+/(SL, ?Γ , ?ev1, S ?X) 〈?C1, ?M 〉,
-                    H_s: 〈c1, ?s 〉 ⇨+/(SL, _ , ?ev2, S ?n') 〈?C2, ?S 〉,
+          | [ H_m : 〈c1, ?m 〉 ⇨+/(SL, ?Γ , ?ev1, ?X) 〈?C1, ?M 〉,
+                    H_s: 〈c1, ?s 〉 ⇨+/(SL, _ , ?ev2, ?n') 〈?C2, ?S 〉,
                          H_wt1 : -{ ?Γ, ?pc ⊢ c1 }-,
                          XX : context [ ?X <= _ ] |- _  ]
             =>
@@ -223,30 +227,34 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
         assert (IH_outer := H).
         apply_seq_comp_ind_IH H c1 leq.
         destruct H.
-
+        
         (* applying the induction hypothesis again, this time to c2 *)
 
         (* transform the indices so they match the patterns *)
-        do 2 match goal with
-                 | [ H : context [ S n - ?X] |- _ ] =>
-                   (assert (n - X <= n) by omega;
-                    replace (S n - X) with (S (n-X))  in * by omega
-                   )
-                 | [ H : context [n' - ?X ] |- _ ] =>
-                   replace (n' - X) with (S (n' - 1 -  X)) in * by omega
-             end.
+
+
+        match goal with
+          | [ H : context [ S n - ?X - 1] |- _ ] =>
+            (assert (n - X <= n) by omega;
+             replace (S n - X - 1) with ((n-X))  in * by omega
+            )        
+        end.
+
+
+
 
         (* apply the IH *)
 
         match goal with
 
-          | [ H_m : 〈c2, ?m 〉 ⇨+/(SL, ?Γ , ?ev1, S ?X) 〈?C1, ?M 〉,
-                    H_s: 〈c2, ?s 〉 ⇨+/(SL, _ , ?ev2, S ?n') 〈?C2, ?S 〉,
+          | [ H_m : 〈c2, ?m 〉 ⇨+/(SL, ?Γ , ev1, ?X) 〈?C1, ?M 〉,
+                    H_s: 〈c2, ?s 〉 ⇨+/(SL, _ , ev2, ?n') 〈?C2, ?S 〉,
                          H_wt : -{ ?Γ, ?pc ⊢ c2 }- ,
                          XX : context [ ?X <= _ ] |- _  ]
-            => specialize (IH_outer X XX Γ pc c2 H_wt m s ev1 ev2 C1 C2 M S n' H H_m H_s)
+            =>specialize (IH_outer X XX Γ pc c2 H_wt m s ev1 ev2 C1 C2 M S n' H H_m H_s) 
         end.
-        crush.
+        eauto.
+
         (* TODO: 2016-07-26; the above may be too boilerplate;
            maybe clean up the code for IH application *)
       }
@@ -282,13 +290,13 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
           (* 2 sub-goals remaining that correspond to both runs
              taking the same run; we handle both cases similarly by
              applying the induction hypothesis *)
-          match goal with
-            |  [ H' : 〈?c_i, s 〉 ⇨+/(SL, _ , ev2, ?X) _   |- _ ]
-               => (replace X with (S (X - 1)) in H' by omega;
-                   specializes~ H c_i
-                  )
-          end.
 
+
+        match goal with
+            |  [ H' : 〈?c_i, s 〉 ⇨+/(SL, _ , ev2, ?X) _   |- _ ]
+               =>   forwards* : H (S n - 1) c_i; omega
+        end.
+        
       - (* pc' = High *)
         clear H. (* no need for the IH *)
         subst.
@@ -300,17 +308,20 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
           'abstract' programs c_i, c_j, where c_i that is taken from
           the m-run, and c_j that is taken from the s-run *)
 
-        assert (exists c_i, 〈c_i, m 〉 ⇨+/(SL, Γ, ev1, S n) 〈c_end, m_end 〉
+        replace (S n - 1) with n in * by omega.
+
+        assert (exists c_i, 〈c_i, m 〉 ⇨+/(SL, Γ, ev1, n) 〈c_end, m_end 〉
                             /\ ( c_i = c1 \/ c_i = c2  ) /\ -{ Γ, High ⊢ c_i }-) as H_i
             by (super_destruct;
                 solve [exists c1; splits~ |  exists c2; split~ ]).
-        assert (exists c_j ,〈c_j, s 〉 ⇨+/(SL, Γ, ev2, S (n' - 1) ) 〈d_end, s_end 〉
+        
+        assert (exists c_j ,〈c_j, s 〉 ⇨+/(SL, Γ, ev2,  (n' - 1) ) 〈d_end, s_end 〉
                             /\ ( c_j = c1 \/ c_j = c2  ) /\ -{ Γ, High ⊢ c_j }- ) as H_j
-            by (
+            by ( 
                 super_destruct;
-                match goal with  | [ H:〈_, s 〉 ⇨+/(SL, Γ, ev2, n') 〈d_end, s_end 〉|- _ ] =>
+(*                match goal with  | [ H:〈_, s 〉 ⇨+/(SL, Γ, ev2, n') 〈d_end, s_end 〉|- _ ] =>
                                    replace n' with (S (n' - 1)) in H by omega
-                end;
+                end. *)
                 solve[ exists c1; splits~ | exists c2; splits~]
               ).
 
@@ -340,7 +351,8 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
       apply while_bridge_properties in H_m.
       apply while_bridge_properties in H_s.
       super_destruct.
-      replace n' with (S (n' - 1)) in * by omega.
+      
+      replace (S n - 1) with n in * by omega.
 
 
       assert ( -{ Γ, pc ⊢ IFB e THEN c;; WHILE e DO c END ELSE SKIP FI }- ).

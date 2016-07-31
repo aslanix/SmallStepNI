@@ -141,26 +141,24 @@ Proof.
     (* We define two auxiliary local propositions that consider the
        cases of a high and a low event respectively; these are then
        used in the case analysis afterwards *)
-
+    
     assert ( low_event Γ Low ev ->
               exists ev0 n' cfg' k,
                 〈 c, m 〉 ⇨+/(SL, Γ, ev0, n') cfg' /\ cfg' ⇒/+ k +/ 〈 STOP, m_end 〉/\ k < S n) as LemmaLowEvent.
     {
       intros H_low.
-      inverts H_low.
+      inversion H_low.
       assert (ℓ' = Low) by
         ( destruct ℓ'; auto; try impossible_flows; subst ); subst.
-      (exists   (AssignmentEvent Low x u) 1).
+      (exists   (AssignmentEvent Low x u) 0).
       forwards* (H_wf' & H_wt' ): preservation.
       compare c' STOP; intros;subst.
       * clear IHn.
-
-
         lets : multi_idx_stop_trivial H_n; subst.
         (exists*〈STOP, m_end 〉0).
         splits~ ; try omega.
         applys~ bridge_low_num.
-
+        
       * specializes~ H_wt' __ .
         specializes~ H_n.
         exists 〈c', m' 〉.
@@ -175,7 +173,7 @@ Proof.
     { clear LemmaLowEvent.
       intros H_high.
       compare c' STOP; intros; subst.
-      - (exists EmptyEvent 1 〈STOP, m' 〉 0).
+      - (exists EmptyEvent 0 〈STOP, m' 〉 0).
         lets : multi_idx_stop_trivial H_n; subst.
         splits~ ; try omega.
         applys*  bridge_stop_num.

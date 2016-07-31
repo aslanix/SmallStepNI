@@ -2,6 +2,8 @@
    Author: Aslan Askarov
    Created: 2016-07-28
  *)
+
+
 Require Import Bool Arith List CpdtTactics SfLib LibTactics.
 Require Import Coq.Program.Equality.
 Require Import Omega.
@@ -26,6 +28,8 @@ Definition TINI_idx (n: nat): Prop :=
     〈c, s 〉 ⇒/+ k +/ 〈STOP, s_end 〉 ->
     state_low_eq Γ m_end s_end.
 
+(** We apply bridge noninterference iteratively
+    for as long as there are bridge events. *)
 Lemma tini_idx: forall n, TINI_idx (n).
 
 Proof.
@@ -75,14 +79,15 @@ Proof.
 
     assert (k1 <= n) as H_k1 by omega.
 
-    replace n1 with (S (n1 - 1)) in * by (inverts* H_bridge_IH1; omega ).
+    (* replace n1 with (S (n1 - 1)) in * by (inverts* H_bridge_IH1; omega ).
     replace n2 with (S (n2 - 1)) in * by (inverts* H_bridge_IH2; omega ).
+     *)
+    
+    lets NI_bridge: ni_bridge_num n1; unfold NI_idx in NI_bridge.
 
-    lets NI_bridge: ni_bridge_num (n1 -1); unfold NI_idx in NI_bridge.
 
 
-
-    specializes~ NI_bridge (>>Γ c m s ev1  c1  m' s' (n2 - 1) ___).
+    specializes~ NI_bridge (>>Γ c m s ev1  c1  m' s' n2 ___).
 
 
     forwards* (? & ?H_wt'): preservation_bridge.
@@ -102,7 +107,7 @@ Proof.
 Qed.
 
 
-(* Standard termination-insensitive noninterference *)
+(** Standard termination-insensitive noninterference *)
 
 Theorem TINI:
   forall Γ c m s m_end s_end pc,

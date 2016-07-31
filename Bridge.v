@@ -6,18 +6,35 @@ Set Implicit Arguments.
 Require Import Identifier Environment Imperative Types Augmented.
 
 
+
+(* obs: that Γ is unused here atm *)
+(*
+Definition low_event (Γ: typenv) ℓ ev:=
+  match ev with
+    | AssignmentEvent ℓ' _ _ => ℓ' ⊑ ℓ
+    | _ => False
+  end.
+Hint Unfold low_event.
+*)
+
+
+
 Inductive low_event : typenv -> level -> event -> Prop :=
 | low_assigment_is_low_event:
     forall Γ ℓ ℓ' x u,
       ( ℓ' ⊑ ℓ) ->
       low_event Γ ℓ (AssignmentEvent ℓ' x u).
 
+Hint Constructors low_event.
+
 Definition high_event Γ ℓ evt := ~low_event Γ ℓ evt.
 
-Definition low_event_step  Γ ℓ evt cfg cfg' := event_step Γ evt cfg cfg' /\ low_event Γ ℓ evt.
-Definition high_event_step Γ ℓ evt cfg cfg' := event_step Γ evt cfg cfg' /\ high_event Γ ℓ evt.
+Definition low_event_step  Γ ℓ evt cfg cfg' :=
+  event_step Γ evt cfg cfg' /\ low_event Γ ℓ evt.
+Definition high_event_step Γ ℓ evt cfg cfg' :=
+  event_step Γ evt cfg cfg' /\ high_event Γ ℓ evt.
 
-Hint Constructors low_event.
+
 Hint Unfold high_event.
 Hint Unfold high_event_step.
 Hint Unfold low_event_step.
@@ -34,15 +51,14 @@ Inductive bridge_step_num:
 | bridge_low_num:
     forall Γ ℓ evt cfg cfg',
       low_event_step Γ ℓ evt cfg cfg' ->
-      bridge_step_num Γ ℓ cfg cfg' evt 1
+      bridge_step_num Γ ℓ cfg cfg' evt 0
 | bridge_stop_num:
     forall Γ ℓ evt cfg cfg',
       high_event_step Γ ℓ evt cfg cfg' ->
       is_stop cfg' ->
-      bridge_step_num Γ ℓ cfg cfg' EmptyEvent 1
+      bridge_step_num Γ ℓ cfg cfg' EmptyEvent 0
 | bridge_trans_num:
     forall Γ ℓ evt' evt'' cfg cfg' cfg'' n,
-      n >=1 ->
       high_event_step Γ ℓ evt' cfg cfg' ->
       is_not_stop cfg' ->
       bridge_step_num Γ ℓ  cfg' cfg'' evt''  n ->
@@ -178,4 +194,3 @@ Proof.
     (exists (S n)).
     econstructor; eauto.
 Qed.
-

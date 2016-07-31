@@ -74,6 +74,7 @@ Proof.
      intros; inversion H0; crush.
      intros. inversion H2. crush.
 Qed.
+Hint Rewrite eval_is_det.
 
 
 Inductive cmd : Type :=

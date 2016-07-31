@@ -6,7 +6,7 @@ Created: 2016-07-26
 
 *)
 
-Require Import Bool Arith List CpdtTactics SfLib LibTactics.
+Require Import Bool Arith List CpdtTactics SfLib LibTactics Omega.
 Require Import Coq.Program.Equality.
 
 Set Implicit Arguments.
@@ -167,15 +167,15 @@ Hint Resolve empty_event_is_high.
 
 
 
-Lemma bridge_steps_are_positive:
+Lemma bridge_steps_are_nonneg:
          forall Γ c m ev n cfg,
            〈 c, m 〉 ⇨+/(SL, Γ, ev, n) cfg ->
-           n >= 1.
+           n >= 0.
          Proof.
-           intros.
-           inverts* H.
+           intros; inverts * H; omega.
 Qed.
-Hint Resolve bridge_steps_are_positive.
+
+Hint Resolve bridge_steps_are_nonneg.
 
 
 Lemma is_non_stop_config_trivial:
