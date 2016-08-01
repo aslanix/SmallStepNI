@@ -1,3 +1,5 @@
+PREPROCESSDIR=doc_preprocess
+
 .PHONY: coq clean
 
 coq: Makefile.coq
@@ -9,3 +11,9 @@ Makefile.coq: Makefile $(VS)
 clean:: Makefile.coq
 	$(MAKE) -f Makefile.coq clean
 	rm -f Makefile.coq
+
+VS = $(wildcard *.v)
+
+doc::
+	for i in $(VS); do cat coqdoc.header $$i > $(PREPROCESSDIR)/$$i; done
+	coqdoc -d doc -utf8 $(PREPROCESSDIR)/*.v

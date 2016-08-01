@@ -1,8 +1,9 @@
-(*
-Properties of the computation when the program counter is high
-Author: Aslan Askarov
-File Created: 2016-07-26 (the content is from 2015)
-*)
+(** Properties of the computation when the program counter is high *)
+
+(*   
+  Author: Aslan Askarov
+  File Created: 2016-07-26 (the content is from 2015)
+ *)
 
 
 Require Import Bool Arith List CpdtTactics SfLib LibTactics.
@@ -11,28 +12,23 @@ Require Import Omega.
 
 Set Implicit Arguments.
 
-Require Import Identifier Environment Imperative Types Augmented Bridge BridgeProperties.
+Require Import Identifier Environment Imperative Types Augmented
+        Bridge BridgeTactics BridgeProperties.
 Require Import WellFormedness LowEq. (* NIexp. *)
-Require Import InductionPrinciple.
 Require Import UtilTactics.
-Require Import BridgeTactics.
-(* Require Import BridgeProperties. *)
 
 
 
-
-
-Ltac tt_SSn_ne_1 :=
-            try match goal with
-              | [ H: S (S ?n) = 1|- _]  =>
-                assert (S (S n) <> 1) by omega;
-                  contradiction
-                end.
 
 
 
 
 (* Note that this lemma is defined in terms of basic steps >> 2015-04-03 *)
+
+(** The main lemma in this file states that a program typed with a
+high pc-label does not update low parts of the memory. Formally, this
+means that the initial and the final memories are low-equivalent. The
+proof procedes by induction on the command.  *)
 
 Lemma high_pc_does_not_update_low_states:
   forall Γ  c m c_end s,
@@ -43,9 +39,10 @@ Lemma high_pc_does_not_update_low_states:
 Proof.
   intros Γ c m c_end s H_wt H H_wf.
   cmd_cases (dependent induction c) Case.
-  Case "STOP".
+  Case "STOP". 
   {
-    tt_wt_cmd_is_not_stop_save_name STOP H_wt'; false.
+    exfalso.
+    eapply wt_programs_are_not_stop; eauto.
   }
 
 
@@ -109,11 +106,12 @@ Proof.
   Case "WHILE".
   {
     inversion H; apply state_low_eq_wf_refl; crush.
+
   }
 Qed.
 
 
-
+(** We lift the above proof to the event step relation *)
 
 
 Lemma high_pc_does_not_update_low_states_event_step:
@@ -165,6 +163,7 @@ Proof.
 
 Qed.
 
+(** Finally, it is also lifted to the bridge relation *)
 
 
 Lemma high_pc_bridge:

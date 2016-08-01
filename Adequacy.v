@@ -1,12 +1,13 @@
 (** Adequacy of the bridge semantics w.r.t. standard semantics for
 well-typed programs.
+*)
 
+(*
 Author: Aslan Askarov
 Created: 2016-07-27
 
 - Note: that well-typedness is required may potentially be relaxed,
   but we leave that for future investigation.
-
  *)
 
 
@@ -25,7 +26,7 @@ Require Import BridgeTactics.
 Require Import BridgeProperties.
 
 
-
+(** We start with a simple lemma stipulating that the augemented semantics is adequate *)
 Lemma adequacy_of_event_steps:
   forall Γ pc c m cfg',
     wf_mem m Γ ->
@@ -141,7 +142,7 @@ Proof.
     (* We define two auxiliary local propositions that consider the
        cases of a high and a low event respectively; these are then
        used in the case analysis afterwards *)
-    
+
     assert ( low_event Γ Low ev ->
               exists ev0 n' cfg' k,
                 〈 c, m 〉 ⇨+/(SL, Γ, ev0, n') cfg' /\ cfg' ⇒/+ k +/ 〈 STOP, m_end 〉/\ k < S n) as LemmaLowEvent.
@@ -158,7 +159,7 @@ Proof.
         (exists*〈STOP, m_end 〉0).
         splits~ ; try omega.
         applys~ bridge_low_num.
-        
+
       * specializes~ H_wt' __ .
         specializes~ H_n.
         exists 〈c', m' 〉.

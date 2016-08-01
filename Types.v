@@ -135,12 +135,5 @@ Proof.
     congruence.
 Qed.
 
+Hint Resolve wt_programs_are_not_stop.
 
-Ltac tt_wt_cmd_is_not_stop_save_name c H_new :=
-  match goal with
-      [H : -{ _, _ ⊢ c }- |- _ ]
-
-      =>
-      assert (H_new := H);
-        apply wt_programs_are_not_stop in H; auto
-  end.
