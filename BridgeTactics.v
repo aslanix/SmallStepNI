@@ -17,7 +17,7 @@ Require Import InductionPrinciple.
 Require Import UtilTactics.
 
 Ltac invert_low_event:=
-        match goal with [ H: context [low_event _ _ EmptyEvent] |- _ ] => inversion H end.
+        match goal with [ H: low_event _ _ _ |- _ ] => inversion H end.
 
 Ltac invert_low_steps :=
   repeat
@@ -252,7 +252,7 @@ Hint Resolve stop_contradiction_more_lemma.
 Ltac stop_contradiction_alt :=
   match goal with [ H : is_not_stop 〈 STOP, ?m 〉 |- _ ] =>
     do 2 unfolds in H;
-    assert (cmd_of 〈STOP, m 〉 = STOP ) by 
+    assert (cmd_of 〈STOP, m 〉 = STOP ) by
     (
       unfolds;
       auto

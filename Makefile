@@ -17,3 +17,7 @@ VS = $(wildcard *.v)
 doc::
 	for i in $(VS); do cat coqdoc.header $$i > $(PREPROCESSDIR)/$$i; done
 	coqdoc -d doc -utf8 $(PREPROCESSDIR)/*.v
+
+docclean:
+	rm -rf $(PREPROCESSDIR)
+	rm -rf doc/*

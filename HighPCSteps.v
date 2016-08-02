@@ -181,11 +181,11 @@ Proof.
        super_destruct.
        contradiction.
      + invert_high_event_step.
-       splits.
+       splits*.
        * _eapply_in_ctxt event_step high_pc_does_not_update_low_states_event_step; eauto.
          super_destruct; auto.
-       * eapply is_stop_config_inversion; eauto.
-       * apply empty_event_is_high.
+       
+
 
   - match goal with | [H : context [bridge_step_num] |- _ ] => inverts H end.
     destruct cfg' as [c' m'].

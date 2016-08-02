@@ -56,7 +56,7 @@ Inductive bridge_step_num:
     forall Γ ℓ evt cfg cfg',
       high_event_step Γ ℓ evt cfg cfg' ->
       is_stop cfg' ->
-      bridge_step_num Γ ℓ cfg cfg' EmptyEvent 0
+      bridge_step_num Γ ℓ cfg cfg' evt 0
 | bridge_trans_num:
     forall Γ ℓ evt' evt'' cfg cfg' cfg'' n,
       high_event_step Γ ℓ evt' cfg cfg' ->

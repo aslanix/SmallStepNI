@@ -160,6 +160,7 @@ Ltac eval_determinism :=
 
 
 
+
 Lemma assign_bridge_properties:
   forall Γ n x e m ev c_end m_end,
     〈x ::= e, m 〉 ⇨+/(SL, Γ, ev, n) 〈c_end, m_end 〉
@@ -168,7 +169,7 @@ Lemma assign_bridge_properties:
           /\ Γ (x) = Some ℓ /\
           ( ℓ  ⊑ Low  -> ev = AssignmentEvent ℓ x v )
           /\
-          (~ℓ  ⊑ Low  -> ev = EmptyEvent)
+          (~ℓ  ⊑ Low  -> high_event Γ Low ev)
        )
        /\ (c_end = STOP)
        /\ (n = 0).
@@ -186,7 +187,7 @@ Proof.
     + invert_step. eval_determinism.
     + intros. destruct ℓ; eauto; impossible_flows.
     + intros.  destruct ℓ; eauto; impossible_flows.
-    + intros. exfalso. eauto.
+
   - invert_high_steps; subst.
     splits ~ .
     match goal with
@@ -196,7 +197,7 @@ Proof.
 
     splits ~ .
     + invert_step. eval_determinism.
-    + intros. exfalso. eauto.
+
   - exfalso.
     invert_high_steps.
     eauto.
@@ -214,9 +215,10 @@ Lemma seq_comp_bridge_property:
                  /\ low_event Γ Low ev
     )
     \/
-    (exists m1' k,
-        k < n /\ n > 0 /\
-       〈c1, m 〉 ⇨+/(SL, Γ, EmptyEvent, k) 〈 STOP, m1' 〉
+    (exists m1' k evt,
+       k < n /\ n > 0 /\
+       high_event Γ Low evt /\
+       〈c1, m 〉 ⇨+/(SL, Γ, evt, k) 〈 STOP, m1' 〉
        /\ 〈c2, m1' 〉 ⇨+/(SL, Γ, ev, n - k - 1 ) 〈 c_end, m_end 〉
     ).
 Proof.
@@ -302,25 +304,27 @@ Proof.
                         rename X into m1_end;
                           rename K into k
         end.
+
+
         right; exists m1_end (S k).
+        match goal with
+            [ _ :  〈 c1', _ 〉 ⇨+/(SL, Γ, ?EV, k) 〈 STOP, _ 〉 |- _ ]
+            => (exists EV)
+        end.
         splits*; try omega.
         apply bridge_trans_num with evt' 〈c1', st' 〉; eauto.
       }
     }
     {
-      right; exists st' 0;
-      split.
-      omega.
-
-      split.
-      omega.
-      split.
-      apply bridge_stop_num with evt'; eauto.
       
-      unfolds is_not_stop;
-      assert (( S n - 0 - 1 =  n )) as X  by omega.
-      rewrite X.
-      assumption.
+      right; exists st' 0 evt'.
+
+      splits; try omega; eauto.
+      - apply bridge_stop_num; eauto.
+      -  unfolds is_not_stop.
+         assert (( S n - 0 - 1 =  n )) as X  by omega.
+         rewrite X.
+         assumption.
     }
   }
 

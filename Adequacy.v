@@ -174,10 +174,12 @@ Proof.
     { clear LemmaLowEvent.
       intros H_high.
       compare c' STOP; intros; subst.
-      - (exists EmptyEvent 0 〈STOP, m' 〉 0).
+      - (exists ev 0 〈STOP, m' 〉 0).
         lets : multi_idx_stop_trivial H_n; subst.
         splits~ ; try omega.
         applys*  bridge_stop_num.
+        
+        
       - forwards*   (H_wf' & H_wt') : preservation.
         specializes~ H_wt'.
         specializes~ IHn.

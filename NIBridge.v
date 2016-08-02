@@ -74,13 +74,34 @@ Proof.
       end.
       forwards* st_eq: leq_updates.
 
-      splits *; (* the main goal is in the hypothesis by now *)
-        (* these take care of the last two technical goals *)
+      splits *.
+      (* the main goal is in the hypothesis by now *)
+      
+      (* these take care of the last two technical goals *)
+      - 
         clear st_eq;
         assert (Low ⊑ Low) by auto;
+        assert ( ~ High ⊑ Low) by  (unfold not; intros H''; inversion H'').
+        destruct ℓ_x; subst.
+        + inverts~ LE.
+          splits;
+          intros;
+          repeat specialize_gen; subst;
+          eauto.
+        + inverts~ LE.
+          splits;
+          intros;
+            repeat specialize_gen; subst;
+            unfolds high_event;
+            contradiction.
+      - intros.
+        destruct ℓ_x; subst;
+        inverts~ LE;
+        assert (Low ⊑ Low) by auto;
         assert ( ~ High ⊑ Low) by  (unfold not; intros H''; inversion H'');
-        destruct ℓ_x; inverts* LE;
-        repeat specialize_gen; subst*.
+        repeat specialize_gen; subst; eauto;
+        unfolds high_event; contradiction.
+
     }
     Case "T_Seq".
     {
@@ -112,8 +133,10 @@ Proof.
         apply_seq_comp_base_IH c1 m s IHcmd_has_type1 leq.
         super_destruct.
         specialize_gens.
+        
         invert_low_event.
-
+        exfalso.
+        eauto.
       }
 
 
@@ -210,15 +233,22 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
         match goal with [ H: context [ _ <-> _ ] |- _ ] => destruct H end.
         specialize_gen.
         invert_low_event.
+        exfalso.
+        eauto.
       }
       {
         (* LR *)
         (* impossible - show via applying the inner IH *)
         apply_seq_comp_base_IH c1 m s IHH_wt1 leq.
         super_destruct.
+        exfalso.
+
         match goal with [ H: low_event _ _ _ <-> low_event _ _ _ |- _ ] => destruct H end.
-        match goal with [H  : low_event _ _ ev1 -> low_event _ _ EmptyEvent,
-                         H' : low_event _ _ ev1 |- _ ] => apply H in H'; inversion H'  end.
+        
+        
+        match goal with [H  : low_event _ _ ev1 -> low_event _ _ _,
+                              H' : low_event _ _ ev1 |- _ ] => apply H in H'; inversion H'  end.
+        eauto.
       }
       {
         clear IHH_wt1 IHH_wt2.
