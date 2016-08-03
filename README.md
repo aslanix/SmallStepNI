@@ -2,6 +2,7 @@
 
 Author: Aslan Askarov
 
+- Some initial description of the proof is in [PROOFSTRUCTURE.md](PROOFSTRUCTURE.md).
 - The standard TINI theorem is at the bottom of `TINI.v`.
 - The workhorse noninterference reasoning is in `NIBridge.v`.
 
@@ -17,6 +18,13 @@ Invoke `make` to compile everything.
 
 
 ## ChangeLog
+
+### 2016-08-03: More simplifications.
+### Added
+- PROOFSTRUCTURE.md is a placeholder for the high-level description of the proof.
+
+### Changed
+- Simplified the definition of Bridge relation.
 
 ### 2016-07-29: Adequacy and Standard TINI
 #### Added
