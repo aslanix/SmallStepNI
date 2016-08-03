@@ -1,4 +1,4 @@
-# Mechanization of a noninterference proof for a toy imperative language with small-step semantics in Coq.
+# Mechanization of a noninterference proof for a simple imperative language with a small-step semantics in Coq.
 
 Author: Aslan Askarov
 
@@ -7,7 +7,7 @@ Author: Aslan Askarov
 - The workhorse noninterference reasoning is in `NIBridge.v`.
 
 ## Usage
-Invoke `make` to compile everything.
+Run `make` to compile everything.
 
 
 ## Notes
@@ -21,7 +21,7 @@ Invoke `make` to compile everything.
 
 ### 2016-08-03: More simplifications.
 ### Added
-- PROOFSTRUCTURE.md is a placeholder for the high-level description of the proof.
+- DESCRIPTION.md is contains a high-level description of the proof architecture.
 
 ### Changed
 - Simplified the definition of Bridge relation.

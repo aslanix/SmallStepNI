@@ -19,6 +19,11 @@ cfg'`, also written as  _cfg_ ⇒ _cfg'_  that relates two configurations.
 A __configuration__ is a pair of a command and a memory, often expressed using
 notation 〈_c_,_m_〉.
 
+Reachability in zero or many steps, denoted as cfg ⇒\* cfg',
+is defined later in module [Bridge.v](Bridge.v).
+The same module also defines reachability in at most n steps with the
+corresponding notation cfg ⇒/+ n +/ cfg'.
+
 ### Security environment
 We assume two security levels _Low_ and _High_ that form a simple two-point
 lattice, with a _flowsto_ relation ⊑, such that for all ℓ we have ℓ ⊑ ℓ, and _Low_ ⊑ _High_, but
@@ -28,7 +33,7 @@ A __security environment__ is a partial function Γ mapping variable names to se
 Variable _x_ has security level ℓ in Γ when `Γ x = Some ℓ`.
 
 ### Well-formedness
-A memory _m_ is well formed w.r.t. a security environment Γ when _dom_ (_m_) = _dom_ (Γ).
+A memory _m_ is well formed w.r.t. a security environment Γ when _dom_ (_m_) = _dom_ (Γ); this is formalized as `wf_mem m Γ`.
 
 
 ### Low-equivalence
@@ -36,13 +41,15 @@ A memory _m_ is well formed w.r.t. a security environment Γ when _dom_ (_m_) = 
 Two memories _m_ and _s_ are low-equivalent w.r.t. an environment Γ, when
 they each are well-formed w.r.t. Γ and they agree on the values of all low variables.
 This is denoted using relation `state_low_eq Γ m s`. Low-equivalence is formally
-defined in [LowEq.v](LowEq.v).
+defined in the module [LowEq.v](LowEq.v).
 
 
 ## Type system
 
-Our type system is a standard information flow type system, in the style of Volpano Smith Irvine (aka Denning-style enforcement). We use notation `-{ Γ, pc ⊢ c}-` to denote that program _c_ is well-typed
-in security environment Γ given the program counter label _pc_.
+The type system is a standard information flow type system, in the style of Volpano Smith Irvine, aka Denning-style enforcement.
+Notation `-{ Γ, pc ⊢ c}-` means that program _c_ is well-typed
+in the security environment Γ given the program counter label _pc_.
+The typing rules are standard, and are formalized in the module [Types.v](Types.v).
 
 
 ### Preservation
@@ -62,7 +69,7 @@ theorem is an excerpt from [WellFormedness.v](WellFormedness.v).
 Top-level noninterference is the standard termination-insensitive
 noninterference. To prove NI we extend our semantics with with so-called _events_ — the resulting event semantics is  an augmentation of the original semantics. We also introduce bridge steps, that
 are the key tool in the proof. We show that each of these extensions is
-adequate w.r.t. the original small-step transition relation in [Adequacy.v](Adequacy.v).
+adequate w.r.t. the original small-step transition relation in the module [Adequacy.v](Adequacy.v).
 
 ### Event semantics
 
@@ -73,7 +80,7 @@ are propagated through sequential composition.
 
 We say that an event step is a low step if it produces a low event, and is a high step otherwise.
 
-The event semantics is defined in [Augmented.v](Augmented.v).
+The event semantics is defined in the module [Augmented.v](Augmented.v).
 
 ### Bridge relation
 
@@ -88,7 +95,7 @@ the strong induction principle in the noninterference for bridge steps.
 We use notation `cfg ↷(Γ, ev, n) cfg'` to denote that configuration _cfg_
 "bridges" to configuration _cfg'_ producing event _ev_ with _n_ intermediate high steps.
 The following rules provide the idea behind the bridge step; see the formal definition
-in [Bridge.v](Bridge.v) for details.
+in the module [Bridge.v](Bridge.v) for details.
 
     low_event_step Γ ℓ evt cfg cfg'
     ______________________________________  [bridge_low_num]
