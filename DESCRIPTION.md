@@ -98,21 +98,21 @@ The following rules provide the idea behind the bridge step; see the formal defi
 in the module [Bridge.v](Bridge.v) for details.
 
     low_event_step Γ ℓ evt cfg cfg'
-    ______________________________________  [bridge_low_num]
+    ____________________________________  [bridge_low_num]
     cfg ↷(Γ, evt, 0) cfg'
 
 
 
-    high_event_step Γ ℓ evt cfg 〈STOP, m 〉     
-    ______________________________________  [bridge_stop_num]
-    cfg ↷(Γ, evt, 0) 〈STOP, m〉
+    high_event_step Γ ℓ evt cfg 〈STOP,m〉
+    ____________________________________  [bridge_stop_num]
+    cfg ↷(Γ, evt, 0) 〈STOP,m〉
 
 
 
     high_event_step Γ ℓ evt cfg cfg'
     is_not_stop cfg'  
     cfg' ↷(Γ, evt'', n) cfg''
-    ______________________________________  [bridge_trans_num]
+    ____________________________________  [bridge_trans_num]
     cfg ↷(Γ, evt'', n+1) cfg''
 
 
