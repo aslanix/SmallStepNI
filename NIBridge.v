@@ -22,9 +22,9 @@ Definition NI_idx (n: nat): Prop :=
   forall Γ pc c,
     -{ Γ, pc ⊢ c }- ->
     forall m s ev1 ev2 c2 d2 m2 s2 n',
-      state_low_eq Γ m s ->
-      〈c, m〉⇨+/(SL, Γ, ev1, n ) 〈c2, m2〉->
-      〈c, s〉⇨+/(SL, Γ, ev2, n') 〈d2, s2〉->
+      state_low_eq Γ m s -> 
+      〈c, m〉 ↷ ( Γ, ev1, n ) 〈c2, m2〉->
+      〈c, s〉 ↷ ( Γ, ev2, n') 〈d2, s2〉->
       state_low_eq Γ m2 s2 /\ c2 = d2 /\
       (low_event Γ Low ev1 <-> low_event Γ Low ev2)
       /\  (low_event Γ Low ev1 -> ev1 = ev2).

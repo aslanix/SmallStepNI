@@ -7,17 +7,6 @@ Require Import Identifier Environment Imperative Types Augmented.
 
 
 
-(* obs: that Γ is unused here atm *)
-(*
-Definition low_event (Γ: typenv) ℓ ev:=
-  match ev with
-    | AssignmentEvent ℓ' _ _ => ℓ' ⊑ ℓ
-    | _ => False
-  end.
-Hint Unfold low_event.
-*)
-
-
 
 Inductive low_event : typenv -> level -> event -> Prop :=
 | low_assigment_is_low_event:
@@ -74,6 +63,13 @@ Tactic Notation "bridge_num_cases" tactic(first) ident(c) :=
 
 Notation " t '⇨+/(SL,' Γ ',' obs ',' n ')'  t' " :=
   (bridge_step_num Γ Low t t' obs n) (at level 40).
+
+
+
+
+Notation " t '↷' '(' Γ ',' obs ',' n ')'  t' " :=
+  (bridge_step_num Γ Low t t' obs n) (at level 40).
+
 
 
 (* Multi-step reduction *)

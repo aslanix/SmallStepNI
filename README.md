@@ -2,7 +2,7 @@
 
 Author: Aslan Askarov
 
-- Some initial description of the proof is in [PROOFSTRUCTURE.md](PROOFSTRUCTURE.md).
+- An (in-progress) description of the proof architecture is available in [DESCRIPTION.md](DESCRIPTION.md).
 - The standard TINI theorem is at the bottom of `TINI.v`.
 - The workhorse noninterference reasoning is in `NIBridge.v`.
 
