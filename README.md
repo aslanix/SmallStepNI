@@ -163,7 +163,7 @@ are sequential composition, if, and while commands.
 
 ### Adequacy and relating to standard NI
 
-We relate noninterference for bridge relation to standard noninterference via
+We relate noninterference for the bridge relation to standard noninterference via
 [adequacy](Adequacy.v) of the bridge relation. The final connection is made in the
 module [NI.v](NI.v).
 
