@@ -92,8 +92,7 @@ adequate w.r.t. the original small-step transition relation in the module [Adequ
 
 #### Event semantics
 
-Event semantics is a semantics that extends the original one with so-called
-_event_.  In the current setting, we distinguish between two kinds of events:
+We distinguish between two kinds of events:
 _low assignments_, and _empty events_ that correspond to all other steps. Events
 are propagated through sequential composition.
 
@@ -105,7 +104,7 @@ The event semantics is defined in the module [Augmented.v](Augmented.v).
 
 Bridge relation is the key workhorse relation. Say that configuration *cfg*
 bridges to configuration *cfg'* when *cfg'* is the first configuration reachable
-from *cfg* that is either a low assignment or program termination. Bridge
+from *cfg* after a low assignment or a *cfg'* is a terminal configuration. Bridge
 relation is defined in terms of the event semantics. Bridge relations are
 indexed by the number of intermediate steps, which is needed in order to apply
 the strong induction principle in the noninterference for bridge steps.
@@ -113,7 +112,7 @@ the strong induction principle in the noninterference for bridge steps.
 
 We use notation `cfg ↷(Γ, ev, n) cfg'` to denote that configuration _cfg_
 "bridges" to configuration _cfg'_ producing event _ev_ with _n_ intermediate high steps.
-The following rules provide the idea behind the bridge step; see the formal definition
+The following rules provide the idea behind the bridge relation; see the formal definition
 in the module [Bridge.v](Bridge.v) for details.
 
     low_event_step Γ ℓ evt cfg cfg'
@@ -137,8 +136,7 @@ in the module [Bridge.v](Bridge.v) for details.
 
 ### Noninterference for bridge steps.
 
-We introduce a shorthand for interference for all relations with n steps, and use
-that in the statement of the bridge noninterference; the following is an excerpt from
+The following is an excerpt from
 [NIBridge.v](NIBridge.v), where the last four lines in the definition encode the postconditions.
 
 
@@ -168,6 +166,16 @@ are sequential composition, if, and while commands.
 We relate noninterference for bridge relation to standard noninterference via
 [adequacy](Adequacy.v) of the bridge relation. The final connection is made in the
 module [NI.v](NI.v).
+
+    (** Standard termination-insensitive noninterference *)
+
+    Theorem TINI:
+      forall Γ c m s m_end s_end pc,
+        -{ Γ, pc ⊢ c }- ->
+          state_low_eq Γ m s ->
+            〈c, m 〉 ⇒* 〈STOP, m_end 〉 ->
+            〈c, s 〉 ⇒* 〈STOP, s_end 〉 ->
+                state_low_eq Γ m_end s_end.
 
 
 ---
