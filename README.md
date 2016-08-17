@@ -186,7 +186,7 @@ module [NI.v](NI.v).
 
 ### 2016-08-03: More simplifications.
 ### Added
-- DESCRIPTION.md is contains a high-level description of the proof architecture.
+- High-level description of the proof architecture.
 
 ### Changed
 - Simplified the definition of Bridge relation.
