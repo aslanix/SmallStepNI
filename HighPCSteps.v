@@ -1,6 +1,6 @@
 (** Properties of the computation when the program counter is high *)
 
-(*   
+(*
   Author: Aslan Askarov
   File Created: 2016-07-26 (the content is from 2015)
  *)
@@ -39,7 +39,7 @@ Lemma high_pc_does_not_update_low_states:
 Proof.
   intros Γ c m c_end s H_wt H H_wf.
   cmd_cases (dependent induction c) Case.
-  Case "STOP". 
+  Case "STOP".
   {
     exfalso.
     eapply wt_programs_are_not_stop; eauto.
@@ -137,7 +137,7 @@ Proof.
        | [ H : context [ WHILE _ DO _ END ]  |- _ ] => immediate_base_case
        | [ H : context [_ ;; _ ] |- _ ]  =>
          (* inductive cases *)
-         (inverts~ H_wt; eapply IHevent_step; auto)
+         (inverts~ H_wt; eapply IHevent_step; auto; crush)
          (* we consider the remaining base cases *)
        | _ => idtac
      end.
@@ -159,7 +159,9 @@ Proof.
             | [ H: context [low_event] |- _ ] => H
             | [ H: High ⊑ Low |- _ ] => H
           end
-        in inverts H.
+        in inverts H. 
+    
+  
 
 Qed.
 
@@ -184,7 +186,7 @@ Proof.
        splits*.
        * _eapply_in_ctxt event_step high_pc_does_not_update_low_states_event_step; eauto.
          super_destruct; auto.
-       
+
 
 
   - match goal with | [H : context [bridge_step_num] |- _ ] => inverts H end.

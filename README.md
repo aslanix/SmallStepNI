@@ -2,6 +2,7 @@
 
 Author: Aslan Askarov
 
+- Coq version: 8.6
 - An (in-progress) description of the [proof architecture](#Proof Architecture) is below.
 - The standard TINI theorem is at the bottom of `TINI.v`.
 - The workhorse noninterference reasoning is in `NIBridge.v`.
@@ -11,7 +12,7 @@ Run `make` to compile everything.
 
 
 ## Notes
-- The proof scripts use CPDT tactics. It assumes existence of the file `CpdtTactics.v` in `lib/cpdt/`; they are not included in the repository.
+- The proof scripts use CPDT tactics; they are included in `lib/cpdt`.
 - The proof uses `LibTactics` and software foundation tactics `SfLib.v`;
   these and other small libraries are included for convenience in `lib/`.
 - Comments and suggestions on how to improve these scripts are welcome.

@@ -51,7 +51,7 @@ Lemma preservation_bridge:
 Proof.
   intros.
   dependent induction H0.
-  
+
   - invert_low_event_step.
     forwards : preservation_event_step evt; eauto.
 
@@ -74,13 +74,13 @@ Lemma while_bridge_properties:
 Proof.
   intros.
   inverts~ H.
-  
+
   split*.
 
   -  exfalso. invert_low_steps.
   - exfalso. invert_low_steps.
   - exfalso. invert_high_steps. eauto.
-  - 
+  -
     invert_high_steps.
     invert_step.
     split; try omega.
@@ -109,7 +109,7 @@ Proof.
   - exfalso. invert_low_steps.
   - exfalso. invert_high_steps. eauto.
   - split~ ; try omega.
-    
+
     invert_high_steps.
     invert_step; [left; exists u | right];
     match goal with [ |- context [S ?x - 1]] =>
@@ -126,11 +126,11 @@ Proof.
   intros.
   unfolds in H.
   unfolds in H.
-  assert ( cmd_of 〈STOP, m 〉= STOP). 
+  assert ( cmd_of 〈STOP, m 〉= STOP).
   auto.
   specialize_gen.
   assumption.
-Qed.  
+Qed.
 
 Hint Resolve is_not_stop_trivial_exf.
 
@@ -201,7 +201,7 @@ Proof.
   - exfalso.
     invert_high_steps.
     eauto.
-Qed.  
+Qed.
 
 
 
@@ -246,7 +246,7 @@ Proof.
 
         end.
     - (* high_step *)
-     
+
      repeat
        match goal with
          | [ H : context [high_event_step] |- _ ] =>
@@ -260,14 +260,15 @@ Proof.
 
          | [ H : context [ _ = 〈 STOP, _ 〉] |- _ ] =>
            inversion H; clear H; contradiction
-       end.
+       end; crush.
+
   }
   (* inductive case *)
   {
     intros.
     inverts H.
 
-    
+
 
     do 3
        match goal with
@@ -278,7 +279,7 @@ Proof.
            inversion H; subst; clear H
 
        end.
-    
+
 
     {
 
@@ -316,7 +317,7 @@ Proof.
       }
     }
     {
-      
+
       right; exists st' 0 evt'.
 
       splits; try omega; eauto.
@@ -335,11 +336,11 @@ Qed.
 Lemma event_low_eq_empty:
   forall Γ,
     event_low_eq Γ EmptyEvent EmptyEvent.
-Proof.                            
+Proof.
   intros.
   unfolds.
   repeat (splits; auto).
-Qed.  
+Qed.
 Hint Resolve event_low_eq_empty.
 
 Lemma event_low_eq_high:
@@ -360,7 +361,7 @@ Proof.
   intros.
   unfolds.
   repeat split; auto.
-Qed.      
+Qed.
 
 Hint Resolve event_low_eq_low.
 
@@ -370,5 +371,5 @@ Lemma config_low_eq_trivial:
     config_low_eq Γ 〈 c, m 〉 〈c, s 〉.
 Proof.
   intros; constructor; auto.
-Qed.  
+Qed.
 Hint Resolve config_low_eq_trivial.

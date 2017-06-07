@@ -6,3 +6,4 @@
 Makefile.coq
 doc
 doc_preprocess
+.DS_Store

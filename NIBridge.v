@@ -156,12 +156,12 @@ Proof.
     Case "T_if".
     {
       (* impossible *)
-      discharge_if_while_base H_m.
+      discharge_if_while_base H_m; crush.
     }
     Case "T_While".
     {
       (* impossible *)
-      discharge_if_while_base H_m.
+      discharge_if_while_base H_m; crush.
     }
   }
   (* inductive case *)
