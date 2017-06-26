@@ -20,6 +20,9 @@ Run `make` to compile everything.
 ---
 ## Proof Architecture
 
+A more thorough description of the proof technique, including some introduction
+and background, is available in [infoflow-basics.pdf](infoflow-basics.pdf).
+
 ### The language and the semantics.
 Our language is the standard imperative language, given by the following grammar
 
