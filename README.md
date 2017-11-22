@@ -2,7 +2,7 @@
 
 Author: Aslan Askarov
 
-- Coq version: 8.6
+- Coq version: 8.7
 - An (in-progress) description of the [proof architecture](#Proof Architecture) is below.
 - The standard TINI theorem is at the bottom of `TINI.v`.
 - The workhorse noninterference reasoning is in `NIBridge.v`.
