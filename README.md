@@ -1,4 +1,4 @@
-# Mechanization of a noninterference proof for a simple imperative language with a small-step semantics in Coq.
+# Mechanization of a noninterference proof via a type system for a simple imperative language with a small-step semantics in Coq.
 
 Author: Aslan Askarov
 
@@ -16,6 +16,7 @@ Run `make` to compile everything.
 - The proof uses `LibTactics` and software foundation tactics `SfLib.v`;
   these and other small libraries are included for convenience in `lib/`.
 - Comments and suggestions on how to improve these scripts are welcome.
+- For a version of this proof technique applied to a dynamic monitor, see this repository https://github.com/Crowton/DynamicNoninterference
 
 ---
 ## Proof Architecture
