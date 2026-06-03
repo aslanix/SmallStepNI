@@ -138,6 +138,8 @@ Inductive state_low_eq : typenv -> state -> state -> Prop:=
        (forall x ℓ, Γ x = Some ℓ -> var_low_eq Γ m1 m2 x) ->
        state_low_eq Γ m1 m2.
 
+#[export] Hint Constructors val_low_eq var_low_eq state_low_eq : sem.
+
 
 Lemma state_low_eq_sym: 
   forall Γ m s, 

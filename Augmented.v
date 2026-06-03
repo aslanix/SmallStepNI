@@ -64,6 +64,8 @@ Inductive event_step : typenv -> event -> config ->  config -> Prop :=
       event_step Γ ev 〈c1, st  〉 〈 STOP, st' 〉  ->
       event_step Γ ev 〈c1;;c2, st 〉 〈c2, st' 〉 .
 
+#[export] Hint Constructors event_step : sem.
+
 
 Tactic Notation "event_step_cases" tactic (first) ident (c) :=
  first;

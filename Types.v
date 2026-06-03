@@ -111,6 +111,8 @@ Inductive cmd_has_type : typenv -> level -> cmd -> Prop :=
 
 where "'-{' Γ ',' pc '⊢' c '}-'" := (cmd_has_type Γ pc c).
 
+#[export] Hint Constructors exp_has_level cmd_has_type : sem.
+
 Tactic Notation "cmd_has_type_cases" tactic (first) ident (c) :=
  first;
  [

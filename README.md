@@ -220,6 +220,18 @@ module [NI.v](NI.v).
   `Print Assumptions TINI` reports *Closed under the global context*: the
   top-level noninterference theorem is fully axiom-free.
 
+#### Optional `sem` automation database
+- Added a dedicated `sem` hint database (`Create HintDb sem`) holding the
+  constructors of the semantic, typing and low-equivalence relations
+  (`eval`, `step`, `exp_has_level`, `cmd_has_type`, `event_step`,
+  `val_low_eq`, `var_low_eq`, `state_low_eq`). It is kept *separate from*
+  `core` so that the existing `crush`/`auto`/`eauto` and LibTactics `*`/`~`
+  automation is unchanged and every existing proof stays stable; new or
+  refactored proofs can opt in with `eauto with sem`. (Putting these
+  constructors in `core` was tried and rejected: it destabilised the
+  auto-star-based proofs, and for the high-level `bridge_step_num`/`multi`
+  relations it made automation synthesise wrong existential witnesses.)
+
 #### Modernized hint declarations
 - Every `Hint` now specifies an explicit database and locality
   (`#[export] ... : core`, `#[local]` where appropriate), with `Create HintDb`

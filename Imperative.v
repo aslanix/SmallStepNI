@@ -157,6 +157,14 @@ Inductive step : config -> config -> Prop :=
           〈 IFB e THEN c;; WHILE e DO c END ELSE SKIP FI, st 〉
 where "cfg '⇒' cfg' " := (step cfg cfg').
 
+(* The [sem] hint database collects the constructors of the semantic, typing
+   and low-equivalence relations. It is deliberately kept separate from [core]
+   so that the existing [crush]/[auto]/[eauto]/[*]/[~] automation is unaffected
+   (the development stays stable), while new or refactored proofs can opt in to
+   the extra automation with [eauto with sem]. *)
+Create HintDb sem.
+#[export] Hint Constructors eval step : sem.
+
 
 Lemma eq_cmd_dec: forall c1 c2: cmd, {c1 = c2} + { c1<>c2 }.
 Proof.
