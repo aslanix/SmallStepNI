@@ -24,8 +24,8 @@ Proof.
   apply eq_id_dec.
 Qed.
 
-Local Hint Resolve eq_exp_dec.
-Local Hint Resolve eq_id_dec.
+#[local] Hint Resolve eq_exp_dec : core.
+#[local] Hint Resolve eq_id_dec : core.
 
 Tactic Notation "exp_cases" tactic (first) ident (c) :=
  first;
@@ -75,7 +75,7 @@ Proof.
      intros; inversion H0; crush.
      intros. inversion H2. crush.
 Qed.
-Hint Rewrite eval_is_det.
+#[export] Hint Rewrite eval_is_det : core.
 
 
 Inductive cmd : Type :=
@@ -114,20 +114,20 @@ Definition cmd_of cfg :=
   match cfg with
     | Config c _ => c
   end.
-Hint Unfold cmd_of.
+#[export] Hint Unfold cmd_of : core.
 
 Definition state_of cfg :=
   match cfg with
     | Config _ m => m
   end.
-Hint Unfold state_of.
+#[export] Hint Unfold state_of : core.
 
 (* lifiting reasoning about STOP to configurations *)
 
 Definition is_stop cfg := cmd_of cfg = STOP.
-Hint Unfold is_stop.
+#[export] Hint Unfold is_stop : core.
 Definition is_not_stop cfg := cmd_of cfg <> STOP.
-Hint Unfold is_not_stop.
+#[export] Hint Unfold is_not_stop : core.
 
 
 
@@ -162,4 +162,4 @@ Lemma eq_cmd_dec: forall c1 c2: cmd, {c1 = c2} + { c1<>c2 }.
 Proof.
   decide equality.
 Qed.
-Local Hint Resolve eq_cmd_dec.
+#[local] Hint Resolve eq_cmd_dec : core.

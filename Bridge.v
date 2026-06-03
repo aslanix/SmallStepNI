@@ -15,7 +15,7 @@ Inductive low_event : typenv -> level -> event -> Prop :=
       ( ℓ' ⊑ ℓ) ->
       low_event Γ ℓ (AssignmentEvent ℓ' x u).
 
-Hint Constructors low_event.
+#[export] Hint Constructors low_event : core.
 
 Definition high_event Γ ℓ evt := ~low_event Γ ℓ evt.
 
@@ -25,15 +25,15 @@ Definition high_event_step Γ ℓ evt cfg cfg' :=
   event_step Γ evt cfg cfg' /\ high_event Γ ℓ evt.
 
 
-Hint Unfold high_event.
-Hint Unfold high_event_step.
-Hint Unfold low_event_step.
+#[export] Hint Unfold high_event : core.
+#[export] Hint Unfold high_event_step : core.
+#[export] Hint Unfold low_event_step : core.
 
 
 Definition event_low_eq Γ ev1 ev2 :=
      (low_event Γ Low ev1 <-> low_event Γ Low ev2)
       /\  (low_event Γ Low ev1 -> ev1 = ev2).
-Hint Unfold event_low_eq.
+#[export] Hint Unfold event_low_eq : core.
 
 
 Inductive bridge_step_num:
@@ -81,7 +81,7 @@ Inductive multi {X:Type} (R: relation X): relation X :=
          R x y ->
          multi R y z ->
          multi R x z.
-Hint Resolve multi_refl.
+#[export] Hint Resolve multi_refl : core.
 
 
 Tactic Notation "multi_cases" tactic(first) ident(c) :=
@@ -133,7 +133,7 @@ Inductive multi_idx {X:Type} (R: relation X) :relation_idx X :=
                          multi_idx R x z (S n).
 
 
-Hint Resolve multi_refl_zero.
+#[export] Hint Resolve multi_refl_zero : core.
 
 
 Tactic Notation "multi_idx_cases" tactic(first) ident(c) :=

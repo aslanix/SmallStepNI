@@ -21,7 +21,7 @@ Proof.
   decide equality.
   apply eq_nat_dec.
 Qed.
-Hint Resolve eq_event_dec.
+#[export] Hint Resolve eq_event_dec : core.
 
 
 

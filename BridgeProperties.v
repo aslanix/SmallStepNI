@@ -133,7 +133,7 @@ Proof.
   assumption.
 Qed.
 
-Hint Resolve is_not_stop_trivial_exf.
+#[export] Hint Resolve is_not_stop_trivial_exf : core.
 
 Lemma skip_bridge_properties:
   forall Γ n m ev c_end m_end,
@@ -342,7 +342,7 @@ Proof.
   unfolds.
   repeat (splits; auto).
 Qed.
-Hint Resolve event_low_eq_empty.
+#[export] Hint Resolve event_low_eq_empty : core.
 
 Lemma event_low_eq_high:
   forall Γ x v y u,
@@ -353,7 +353,7 @@ Proof.
   repeat split; intros; inversion H; impossible_flows.
 Qed.
 
-Hint Resolve event_low_eq_high.
+#[export] Hint Resolve event_low_eq_high : core.
 
 Lemma event_low_eq_low:
   forall Γ x v,
@@ -364,7 +364,7 @@ Proof.
   repeat split; auto.
 Qed.
 
-Hint Resolve event_low_eq_low.
+#[export] Hint Resolve event_low_eq_low : core.
 
 Lemma config_low_eq_trivial:
   forall Γ m s c,
@@ -373,4 +373,4 @@ Lemma config_low_eq_trivial:
 Proof.
   intros; constructor; auto.
 Qed.
-Hint Resolve config_low_eq_trivial.
+#[export] Hint Resolve config_low_eq_trivial : core.

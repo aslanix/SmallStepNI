@@ -10,15 +10,13 @@
 
 (** * From the Coq Standard Library *)
 
-From Stdlib Require Lia.   (* needed for using the [lia] tactic *)
+From Stdlib Require Import Lia.   (* needed for using the [lia] tactic *)
 From Stdlib Require Export Bool.
 From Stdlib Require Export List.
 From Stdlib Require Export Arith.
 From Stdlib Require Export Arith.EqNat.  (* Contains [Nat.eqb], among other things *)
 
 (** * From Basics.v *)
-
-Definition admit {T: Type} : T.  Admitted.
 
 From Stdlib Require Export String. Global Open Scope string_scope.
 
@@ -70,13 +68,14 @@ Proof.
 Theorem andb_true_elim2 : forall b c,
   andb b c = true -> c = true.
 Proof.
-(* An exercise in Basics.v *)
-Admitted.
+  intros b c H. destruct b; destruct c; simpl in *; congruence.
+Qed.
 
 Theorem beq_nat_sym : forall (n m : nat),
   Nat.eqb n m = Nat.eqb m n.
-(* An exercise in Lists.v *)
-Admitted.
+Proof.
+  induction n; destruct m; simpl; try reflexivity. apply IHn.
+Qed.
 
 (* From Poly.v *)
 
@@ -106,9 +105,9 @@ Proof.
 Theorem not_eq_beq_false : forall n n' : nat,
      n <> n' ->
      Nat.eqb n n' = false.
-Proof. 
-(* An exercise in Logic.v *)
-Admitted.
+Proof.
+  intros n n' H. rewrite Nat.eqb_neq. assumption.
+Qed.
 
 Theorem ex_falso_quodlibet : forall (P:Prop),
   False -> P.
@@ -118,19 +117,31 @@ Proof.
 
 Theorem ev_not_ev_S : forall n,
   ev n -> ~ ev (S n).
-Proof. 
-(* An exercise in Logic.v *)
-Admitted.
+Proof.
+  intros n H. induction H.
+  - intros contra. inversion contra.
+  - intros contra. apply IHev. inversion contra. assumption.
+Qed.
 
 Theorem ble_nat_true : forall n m,
   ble_nat n m = true -> n <= m.
-(* An exercise in Logic.v *)
-Admitted.
+Proof.
+  induction n as [|n' IHn]; intros m H.
+  - lia.
+  - destruct m as [|m']; simpl in H.
+    + discriminate.
+    + apply IHn in H; lia.
+Qed.
 
 Theorem ble_nat_false : forall n m,
   ble_nat n m = false -> ~(n <= m).
-(* An exercise in Logic.v *)
-Admitted.
+Proof.
+  induction n as [|n' IHn]; intros m H.
+  - simpl in H; discriminate.
+  - destruct m as [|m']; simpl in H.
+    + lia.
+    + apply IHn in H; intros Hle; apply H; lia.
+Qed.
 
 Inductive appears_in (n : nat) : list nat -> Prop :=
 | ai_here : forall l, appears_in n (n::l)
@@ -177,7 +188,10 @@ Theorem multi_trans :
       multi R y z ->
       multi R x z.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X R x y z Hxy Hyz. induction Hxy.
+  - assumption.
+  - apply multi_step with y. assumption. apply IHHxy. assumption.
+Qed.
 
 (* Identifiers and polymorphic partial maps. *)
 Inductive id : Type := 
@@ -247,8 +261,8 @@ Qed.
 
 Lemma extend_shadow : forall A (ctxt: partial_map A) t1 t2 x1 x2,
   extend (extend ctxt x2 t1) x2 t2 x1 = extend ctxt x2 t2 x1.
-Proof with auto.
-  intros. unfold extend. destruct (beq_id x2 x1)...
+Proof.
+  intros. unfold extend. destruct (beq_id x2 x1); auto.
 Qed.
 
 (** * Some useful tactics *)

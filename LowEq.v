@@ -228,7 +228,10 @@ Qed.
 
 (* Updating low-eq memories in a low-eq manner preserves low-equivalence *)
 
-Lemma leq_updates: 
+Create HintDb SComp.
+#[export] Hint Resolve eq_nat_dec : SComp.
+
+Lemma leq_updates:
   forall Γ ℓ x m s u v,
     state_low_eq Γ m s ->
     Γ x = Some ℓ ->
@@ -240,11 +243,8 @@ Proof.
   inversion H.
   apply state_low_eq_; auto.
   
-  Focus 3.
-
-  {
+  3: {
     intros.
-    Hint Resolve eq_nat_dec: SComp.
     rename x0 into y.
                                
     compare x y; auto with SComp.
@@ -273,7 +273,6 @@ Proof.
     
   }
 
-  Unfocus.
   {
     subst.
     unfold wf_mem in *.
@@ -363,4 +362,4 @@ Definition config_low_eq (Γ:typenv) cfg cfg' :=
     | Config c m, Config c' m' => c = c' /\ state_low_eq Γ m m'
   end.
 
-Hint Unfold config_low_eq.
+#[export] Hint Unfold config_low_eq : core.

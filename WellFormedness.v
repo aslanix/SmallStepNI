@@ -13,15 +13,16 @@ Require Import Types Augmented.
 
 
 
-Hint Resolve eq_exp_dec : Sec.
-Hint Resolve eq_id_dec : Sec.
-Hint Resolve eq_cmd_dec : Sec.
-Hint Resolve eq_level_dec : Sec.
-Hint Resolve eq_event_dec: Sec.
+Create HintDb Sec.
+#[export] Hint Resolve eq_exp_dec : Sec.
+#[export] Hint Resolve eq_id_dec : Sec.
+#[export] Hint Resolve eq_cmd_dec : Sec.
+#[export] Hint Resolve eq_level_dec : Sec.
+#[export] Hint Resolve eq_event_dec : Sec.
 (* Hint Resolve eq_obs_dec : Sec. *)
 (* Hint Resolve multi_refl : Sec. *)
-Hint Resolve flowsto_sym : Sec.
-Hint Resolve high_does_not_flow_to_low :Sec.
+#[export] Hint Resolve flowsto_sym : Sec.
+#[export] Hint Resolve high_does_not_flow_to_low : Sec.
 (* Hint Resolve config_is_stop_config : Sec. *)
 
 
@@ -56,15 +57,15 @@ Definition wt_cfg (cfg: config) ( Γ: typenv) (pc: level): Prop :=
   match cfg with
     | Config c m => wf_mem m Γ /\ ( c <> STOP -> -{ Γ, pc ⊢ c }- )
   end.
-Hint Unfold wt_cfg.
+#[export] Hint Unfold wt_cfg : core.
      
 Notation  "'={' Γ ',' pc '⊢' cfg '}='" := 
   (wt_cfg cfg Γ pc ) (at level 40).
 
-Local Hint Resolve eq_nat_dec.
+#[local] Hint Resolve eq_nat_dec : core.
 
 (* TODO : move this hint someplace else *) 
-Hint Extern 4 (_ <> STOP) => let X:= fresh in unfolds; intros X; inverts X. 
+#[export] Hint Extern 4 (_ <> STOP) => (let X:= fresh in unfolds; intros X; inverts X) : core.
 
 Theorem preservation_cfg:
   forall Γ pc cfg cfg',
@@ -167,7 +168,7 @@ Proof.
 
 Qed.    
 
-Hint Rewrite event_step_inversion.
+#[export] Hint Rewrite event_step_inversion : core.
 
 Lemma preservation_evt_cfg:
   forall Γ evt pc cfg cfg',
