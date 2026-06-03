@@ -205,8 +205,13 @@ module [NI.v](NI.v).
   `coq_makefile` / `coqdoc`.
 
 #### Removed all admits and axioms
-- Proved the seven formerly-`Admitted` lemmas in the bundled `SfLib` and removed
-  its `admit : forall T, T` definition.
+- Trimmed the bundled `SfLib` (285 -> 81 lines) down to the items this
+  development actually uses -- the `Case`/`SCase` and `solve by inversion`
+  tactics and the `relation`, `deterministic` and `ex_falso_quodlibet`
+  definitions -- deleting the unused Software-Foundations exercise material
+  (the `Admitted` exercise lemmas, the toy `ev`/`appears_in`/`next_nat`/...
+  inductives, the `beq_id`/`partial_map`/`extend` maps, and SfLib's own
+  `multi`), as well as its `admit : forall T, T` definition.
 - Replaced `LibTactics`'s `Axiom inj_pair2` with a proof (via
   `Eqdep.EqdepTheory.inj_pair2`) and removed the `skip_axiom : False` soundness
   hole, routing `skip`/`admit`/`demo` through the existential-variable
