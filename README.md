@@ -231,6 +231,16 @@ module [NI.v](NI.v).
   constructors in `core` was tried and rejected: it destabilised the
   auto-star-based proofs, and for the high-level `bridge_step_num`/`multi`
   relations it made automation synthesise wrong existential witnesses.)
+- Used `eauto with sem` in two typing reconstructions where it pays off: the
+  `WHILE` case of `preservation_cfg` and the `IFB`/`WHILE` typing build in
+  `NIBridge` (the latter, a 6-line manual `T_If`/`T_Seq`/`T_While`/`T_Skip`
+  construction, becomes `by eauto with sem`).
+- Also provided `crush_sem := crush; eauto with sem` (in `Imperative.v`): a
+  strictly stronger, opt-in finisher that runs `crush` and then discharges any
+  remaining constructor-shaped goals via `sem`. (`crush` itself ignores hint
+  databases, so it cannot benefit from `sem` directly; redefining `crush`
+  would have the same destabilising effect as polluting `core`.) Used in
+  `val_low_eq_sym` as a demonstration.
 
 #### Modernized hint declarations
 - Every `Hint` now specifies an explicit database and locality

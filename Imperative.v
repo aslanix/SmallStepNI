@@ -165,6 +165,14 @@ where "cfg '⇒' cfg' " := (step cfg cfg').
 Create HintDb sem.
 #[export] Hint Constructors eval step : sem.
 
+(* [crush_sem] is a strictly stronger finisher than [crush] for this
+   development: it runs [crush] for simplification and then discharges any
+   remaining constructor-shaped goals (typing / semantics / low-equivalence)
+   with the [sem] database. It is provided as an opt-in tactic rather than by
+   redefining [crush], which -- like adding these hints to [core] -- would
+   disturb the existing auto-star-based proofs. *)
+Ltac crush_sem := crush; eauto with sem.
+
 
 Lemma eq_cmd_dec: forall c1 c2: cmd, {c1 = c2} + { c1<>c2 }.
 Proof.

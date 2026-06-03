@@ -386,13 +386,8 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
       replace (S n - 1) with n in * by lia.
 
 
-      assert ( -{ Γ, pc ⊢ IFB e THEN c;; WHILE e DO c END ELSE SKIP FI }- ).
-      {
-        apply  T_If with ℓ pc'; auto.
-        applys* T_Seq.
-        apply T_While with ℓ pc'; auto.
-        apply* T_Skip.
-      }
+      assert ( -{ Γ, pc ⊢ IFB e THEN c;; WHILE e DO c END ELSE SKIP FI }- )
+        by eauto with sem.
 
       applys* H (IFB e THEN c;; WHILE e DO c END ELSE SKIP FI).
     } (* unfocus T_While *)

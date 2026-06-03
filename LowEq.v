@@ -15,9 +15,11 @@ Require Import Identifier Environment Imperative WellFormedness UtilTactics Type
 
 Inductive val_low_eq : level -> nat -> nat -> Prop :=
   | VLEqH : forall u v, val_low_eq High u v
-  | VLEqL : forall u v, 
+  | VLEqL : forall u v,
         u = v ->
         val_low_eq Low u v.
+
+#[export] Hint Constructors val_low_eq : sem.
 
 Lemma low_eq_flowsto : forall ℓ ℓ' u v,
                          ℓ  ⊑ ℓ' ->
@@ -33,9 +35,7 @@ Lemma val_low_eq_sym:
      val_low_eq ℓ u v ->
      val_low_eq ℓ v u.
 Proof.
-   intros.
-   inversion H; crush.
-   apply VLEqH.
+   intros ℓ u v H; destruct H; crush_sem.
 Qed.
  
 Lemma val_low_eq_sym_trans:
@@ -76,6 +76,8 @@ Inductive var_low_eq : typenv -> state -> state -> id -> Prop :=
       m2 x = Some v ->
       val_low_eq ℓ u v ->
       var_low_eq Γ m1 m2 x.
+
+#[export] Hint Constructors var_low_eq : sem.
 
 
 
@@ -138,7 +140,7 @@ Inductive state_low_eq : typenv -> state -> state -> Prop:=
        (forall x ℓ, Γ x = Some ℓ -> var_low_eq Γ m1 m2 x) ->
        state_low_eq Γ m1 m2.
 
-#[export] Hint Constructors val_low_eq var_low_eq state_low_eq : sem.
+#[export] Hint Constructors state_low_eq : sem.
 
 
 Lemma state_low_eq_sym: 

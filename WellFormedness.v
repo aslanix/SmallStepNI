@@ -135,9 +135,7 @@ Proof.
     specializes *H.
     inverts *H.
     inverts* H_step.
-    split*; intros.
-    apply T_If with (ℓ:=ℓ) (pc' := pc'); repeat constructor; auto. 
-    apply T_While with (ℓ:=ℓ) (pc' := pc'); repeat constructor; auto.
+    split*; intros; eauto with sem.
   }
 Qed.
 
