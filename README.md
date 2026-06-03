@@ -203,8 +203,24 @@ module [NI.v](NI.v).
   keywords by recent Rocq and would otherwise break parsing of numeric literals.
 - Build driver now invokes `rocq makefile` / `rocq doc` instead of the renamed
   `coq_makefile` / `coqdoc`.
-- `Print Assumptions TINI` reports *Closed under the global context*: the top-level
-  noninterference theorem remains axiom-free.
+
+#### Removed all admits and axioms
+- Proved the seven formerly-`Admitted` lemmas in the bundled `SfLib` and removed
+  its `admit : forall T, T` definition.
+- Replaced `LibTactics`'s `Axiom inj_pair2` with a proof (via
+  `Eqdep.EqdepTheory.inj_pair2`) and removed the `skip_axiom : False` soundness
+  hole, routing `skip`/`admit`/`demo` through the existential-variable
+  implementation (which cannot close a proof unsoundly).
+- The development now declares no `Admitted`, `Axiom`, or `Parameter`, and
+  `Print Assumptions TINI` reports *Closed under the global context*: the
+  top-level noninterference theorem is fully axiom-free.
+
+#### Modernized hint declarations
+- Every `Hint` now specifies an explicit database and locality
+  (`#[export] ... : core`, `#[local]` where appropriate), with `Create HintDb`
+  for the `Sec`/`SComp` databases.
+- Replaced the deprecated `Focus`/`Unfocus` vernaculars in `LowEq.v` with the
+  `N: { ... }` goal selector.
 
 ### 2016-08-03: More simplifications.
 ### Added
