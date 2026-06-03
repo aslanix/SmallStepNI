@@ -1,5 +1,6 @@
-Require Import Bool Arith List CpdtTactics SfLib LibTactics Omega.
-Require Import Coq.Program.Equality.
+From Stdlib Require Import Bool Arith List Lia.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
 
 Set Implicit Arguments.
 
@@ -172,7 +173,7 @@ Proof.
     assert (multi_idx R x y0 1) by (econstructor; eauto).
 
     specialize (IHn y0 y z m H5 H0).
-    replace (S n + m) with (S (n + m)) by omega.
+    replace (S n + m) with (S (n + m)) by lia.
     eapply multi_step_more; eauto.
 Qed.
 

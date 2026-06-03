@@ -2,9 +2,9 @@
 
 Author: Aslan Askarov
 
-- Coq version: 8.7
+- Rocq Prover version: 9.2 (the proof also builds with the `coqc`-compatible toolchain of recent Coq/Rocq releases).
 - An (in-progress) description of the [proof architecture](#Proof Architecture) is below.
-- The standard TINI theorem is at the bottom of `TINI.v`.
+- The standard TINI theorem is at the bottom of `NI.v`.
 - The workhorse noninterference reasoning is in `NIBridge.v`.
 
 ## Usage
@@ -188,6 +188,23 @@ module [NI.v](NI.v).
 
 
 ## ChangeLog
+
+### 2026-06-03: Port to the Rocq Prover 9.2
+#### Changed
+- Updated the development to build with the Rocq Prover 9.2 (post Coq→Rocq renaming).
+- Standard-library imports now use the `From Stdlib Require ...` form (the stdlib
+  is a separate package since Rocq 9.0).
+- Replaced the removed `Omega` library / `omega` tactic with `Lia` / `lia`.
+- Replaced the removed `Implicit Arguments` command with `Arguments`, the removed
+  no-argument `instantiate` and `elimtype` tactics, and the section-less `Variable`
+  declaration in the bundled `LibTactics`.
+- Updated the bundled `SfLib` to modern `Nat.eqb` lemmas and dropped the numbered
+  `solve by inversion N` notations, whose literal numeric tokens are reserved as
+  keywords by recent Rocq and would otherwise break parsing of numeric literals.
+- Build driver now invokes `rocq makefile` / `rocq doc` instead of the renamed
+  `coq_makefile` / `coqdoc`.
+- `Print Assumptions TINI` reports *Closed under the global context*: the top-level
+  noninterference theorem remains axiom-free.
 
 ### 2016-08-03: More simplifications.
 ### Added

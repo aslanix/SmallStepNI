@@ -6,9 +6,10 @@
  *)
 
 
-Require Import Bool Arith List CpdtTactics SfLib LibTactics.
-Require Import Coq.Program.Equality.
-Require Import Omega.
+From Stdlib Require Import Bool Arith List.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
+From Stdlib Require Import Lia.
 
 Set Implicit Arguments.
 
@@ -76,7 +77,9 @@ Proof.
     end; auto.
     unfold update_st in *;   unfold update_env in *.
     inversion H_wt; subst.
-    assert (ℓ' = High) by (destruct ℓ'; crush); subst.
+    assert (ℓ' = High) by
+        (destruct ℓ';
+         [ exfalso; eapply high_does_not_flow_to_low; eauto | reflexivity ]); subst.
     destruct (eq_id_dec i x); subst.
     {
       assert (ℓ  = High) by (crush; auto).

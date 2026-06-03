@@ -45,7 +45,7 @@
 
 Set Implicit Arguments.
 
-Require Import List.
+From Stdlib Require Import List.
 
 (* Very important to remove hint trans_eq_bool from LibBool,
    otherwise eauto slows down dramatically:
@@ -352,7 +352,7 @@ Ltac fast_rm_inside E :=
     In order for tactics to convert their arguments into natural numbers,
     we provide a conversion tactic. *)
 
-Require Coq.Numbers.BinNums Coq.ZArith.BinInt.
+From Stdlib Require Numbers.BinNums ZArith.BinInt.
 
 Definition ltac_nat_from_int (x:BinInt.Z) : nat :=
   match x with
@@ -1503,7 +1503,7 @@ Ltac equates_several E cont :=
   let rec go pos :=
      match pos with
      | nil => cont tt
-     | (boxer ?n)::?pos' => equates_one n; [ instantiate; go pos' | ]
+     | (boxer ?n)::?pos' => equates_one n; [ go pos' | ]
      end in
   go all_pos.
 
@@ -1538,7 +1538,7 @@ Tactic Notation "applys_eq" constr(H) constr(n1) constr(n2) constr(n3) constr(n4
     anything else *)
 
 Tactic Notation "false_goal" :=
-  elimtype False.
+  exfalso.
 
 (** [false_post] is the underlying tactic used to prove goals
     of the form [False]. In the default implementation, it proves
@@ -1569,7 +1569,7 @@ Tactic Notation "tryfalse" :=
 
 Ltac false_then E cont :=
   false_goal; first
-  [ applys E; instantiate
+  [ applys E
   | forwards_then E ltac:(fun M =>
       pose M; jauto_set_hyps; intros; false) ];
   cont tt.
@@ -2469,7 +2469,7 @@ Tactic Notation "subst_eq" constr(E) :=
 (* ---------------------------------------------------------------------- *)
 (** ** Tactics to work with proof irrelevance *)
 
-Require Import ProofIrrelevance.
+From Stdlib Require Import ProofIrrelevance.
 
 (** [pi_rewrite E] replaces [E] of type [Prop] with a fresh
     unification variable, and is thus a practical way to
@@ -3044,7 +3044,7 @@ Tactic Notation "cases_if'" :=
     [inductions E gen X1 .. XN] is a shorthand for
     [dependent induction E generalizing X1 .. XN]. *)
 
-Require Import Coq.Program.Equality.
+From Stdlib Require Import Program.Equality.
 
 Ltac inductions_post :=
   unfold eq' in *.
@@ -3135,14 +3135,14 @@ Tactic Notation "induction_wf" ":" constr(E) ident(X) :=
     judgment that includes a counter for the maximal height
     (see LibTacticsDemos for an example) *)
 
-Require Import Compare_dec Omega.
+From Stdlib Require Import Compare_dec Lia.
 
 Lemma induct_height_max2 : forall n1 n2 : nat,
   exists n, n1 < n /\ n2 < n.
 Proof using.
   intros. destruct (lt_dec n1 n2).
-  exists (S n2). omega.
-  exists (S n1). omega.
+  exists (S n2). lia.
+  exists (S n1). lia.
 Qed.
 
 Ltac induct_height_step x :=
@@ -3180,8 +3180,8 @@ Ltac clear_coind :=
 
 (** Tactic [abstracts tac] is like [abstract tac] except that
     it clears the coinduction hypotheses so that the productivity
-    check will be happy. For example, one can use [abstracts omega]
-    to obtain the same behavior as [omega] but with an auxiliary
+    check will be happy. For example, one can use [abstracts lia]
+    to obtain the same behavior as [lia] but with an auxiliary
     lemma being generated. *)
 
 Tactic Notation "abstracts" tactic(tac) :=
@@ -4766,10 +4766,10 @@ Ltac skip_with_existential :=
     let H := fresh in evar(H:G); eexact H end.
 
 (* TO BE DEPRECATED: *)
-Variable skip_axiom : False.
+#[local] Parameter skip_axiom : False.
   (* To obtain a safe development, change to [skip_axiom : True] *)
 Ltac skip_with_axiom :=
-  elimtype False; apply skip_axiom.
+  exfalso; apply skip_axiom.
 
 Tactic Notation "skip" :=
   skip_with_axiom.

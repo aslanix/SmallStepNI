@@ -2,7 +2,7 @@ Section InductionPrinciple.
 
 (* http://pldev.blogspot.dk/2012/02/proving-strong-induction-principle-for.html *)
 
-Require Export Datatypes.
+From Stdlib Require Export Datatypes.
 
 
 

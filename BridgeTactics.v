@@ -6,8 +6,9 @@ Created: 2016-07-26
 
 *)
 
-Require Import Bool Arith List CpdtTactics SfLib LibTactics Omega.
-Require Import Coq.Program.Equality.
+From Stdlib Require Import Bool Arith List Lia.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
 
 Set Implicit Arguments.
 
@@ -172,7 +173,7 @@ Lemma bridge_steps_are_nonneg:
            〈 c, m 〉 ⇨+/(SL, Γ, ev, n) cfg ->
            n >= 0.
          Proof.
-           intros; inverts * H; omega.
+           intros; inverts * H; lia.
 Qed.
 
 Hint Resolve bridge_steps_are_nonneg.

@@ -10,17 +10,17 @@
 
 (** * From the Coq Standard Library *)
 
-Require Omega.   (* needed for using the [omega] tactic *)
-Require Export Bool.
-Require Export List.
-Require Export Arith.
-Require Export Arith.EqNat.  (* Contains [beq_nat], among other things *)
+From Stdlib Require Lia.   (* needed for using the [lia] tactic *)
+From Stdlib Require Export Bool.
+From Stdlib Require Export List.
+From Stdlib Require Export Arith.
+From Stdlib Require Export Arith.EqNat.  (* Contains [Nat.eqb], among other things *)
 
 (** * From Basics.v *)
 
 Definition admit {T: Type} : T.  Admitted.
 
-Require String. Open Scope string_scope.
+From Stdlib Require Export String. Global Open Scope string_scope.
 
 Ltac move_to_top x :=
   match reverse goal with
@@ -74,7 +74,7 @@ Proof.
 Admitted.
 
 Theorem beq_nat_sym : forall (n m : nat),
-  beq_nat n m = beq_nat m n.
+  Nat.eqb n m = Nat.eqb m n.
 (* An exercise in Lists.v *)
 Admitted.
 
@@ -105,7 +105,7 @@ Proof.
 
 Theorem not_eq_beq_false : forall n n' : nat,
      n <> n' ->
-     beq_nat n n' = false.
+     Nat.eqb n n' = false.
 Proof. 
 (* An exercise in Logic.v *)
 Admitted.
@@ -159,7 +159,7 @@ Inductive multi (X:Type) (R: relation X)
                     R x y ->
                     multi X R y z ->
                     multi X R x z.
-Implicit Arguments multi [[X]]. 
+Arguments multi {X} _ _ _.
 
 Tactic Notation "multi_cases" tactic(first) ident(c) :=
   first;
@@ -185,21 +185,21 @@ Inductive id : Type :=
 
 Definition beq_id id1 id2 :=
   match (id1, id2) with
-    (Id n1, Id n2) => beq_nat n1 n2
+    (Id n1, Id n2) => Nat.eqb n1 n2
   end.
 
 Theorem beq_id_refl : forall i,
   true = beq_id i i.
 Proof.
   intros. destruct i.
-  apply beq_nat_refl.  Qed.
+  symmetry. apply Nat.eqb_refl.  Qed.
 
 Theorem beq_id_eq : forall i1 i2,
   true = beq_id i1 i2 -> i1 = i2.
 Proof.
   intros i1 i2 H.
   destruct i1. destruct i2.
-  apply beq_nat_eq in H. subst.
+  symmetry in H. apply Nat.eqb_eq in H. subst.
   reflexivity.  Qed.
 
 Theorem beq_id_false_not_eq : forall i1 i2,
@@ -207,7 +207,7 @@ Theorem beq_id_false_not_eq : forall i1 i2,
 Proof.
   intros i1 i2 H.
   destruct i1. destruct i2.
-  apply beq_nat_false in H.
+  apply Nat.eqb_neq in H.
   intros C. apply H. inversion C. reflexivity.  Qed.
 
 Theorem not_eq_beq_id_false : forall i1 i2,
@@ -259,11 +259,12 @@ Tactic Notation "solve_by_inversion_step" tactic(t) :=
   end
   || fail "because the goal is not solvable by inversion.".
 
-Tactic Notation "solve" "by" "inversion" "1" :=
-  solve_by_inversion_step idtac.
-Tactic Notation "solve" "by" "inversion" "2" :=
-  solve_by_inversion_step (solve by inversion 1).
-Tactic Notation "solve" "by" "inversion" "3" :=
-  solve_by_inversion_step (solve by inversion 2).
+(* NB: The original SfLib defined numbered variants
+   [solve by inversion 1 | 2 | 3]. In recent Rocq, using the bare numeric
+   literals "1", "2", "3" as Tactic Notation tokens reserves them as keywords,
+   which then prevents 1/2/3 from being parsed as numeric term literals
+   everywhere else. We therefore keep only the (unnumbered) [solve by inversion]
+   form, which performs a single inversion step and is the variant actually
+   relied upon. *)
 Tactic Notation "solve" "by" "inversion" :=
-  solve by inversion 1.
+  solve_by_inversion_step idtac.

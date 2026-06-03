@@ -4,9 +4,10 @@
  *)
 
 
-Require Import Bool Arith List CpdtTactics SfLib LibTactics.
-Require Import Coq.Program.Equality.
-Require Import Omega.
+From Stdlib Require Import Bool Arith List.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
+From Stdlib Require Import Lia.
 
 Set Implicit Arguments.
 
@@ -77,10 +78,10 @@ Proof.
     destruct cfg2 as [c2 s'].
 
 
-    assert (k1 <= n) as H_k1 by omega.
+    assert (k1 <= n) as H_k1 by lia.
 
-    (* replace n1 with (S (n1 - 1)) in * by (inverts* H_bridge_IH1; omega ).
-    replace n2 with (S (n2 - 1)) in * by (inverts* H_bridge_IH2; omega ).
+    (* replace n1 with (S (n1 - 1)) in * by (inverts* H_bridge_IH1; lia ).
+    replace n2 with (S (n2 - 1)) in * by (inverts* H_bridge_IH2; lia ).
      *)
     
     lets NI_bridge: ni_bridge_num n1; unfold NI_idx in NI_bridge.
