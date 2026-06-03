@@ -1,5 +1,6 @@
-Require Import Bool Arith List CpdtTactics SfLib LibTactics.
-Require Import Coq.Program.Equality.
+From Stdlib Require Import Bool Arith List.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
 
 
 Set Implicit Arguments.
@@ -20,7 +21,7 @@ Proof.
   decide equality.
   apply eq_nat_dec.
 Qed.
-Hint Resolve eq_event_dec.
+#[export] Hint Resolve eq_event_dec : core.
 
 
 
@@ -62,6 +63,8 @@ Inductive event_step : typenv -> event -> config ->  config -> Prop :=
                         c2 <> STOP ->
       event_step Γ ev 〈c1, st  〉 〈 STOP, st' 〉  ->
       event_step Γ ev 〈c1;;c2, st 〉 〈c2, st' 〉 .
+
+#[export] Hint Constructors event_step : sem.
 
 
 Tactic Notation "event_step_cases" tactic (first) ident (c) :=

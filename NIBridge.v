@@ -1,8 +1,9 @@
 
 
-Require Import Bool Arith List CpdtTactics SfLib LibTactics.
-Require Import Coq.Program.Equality.
-Require Import Omega.
+From Stdlib Require Import Bool Arith List.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
+From Stdlib Require Import Lia.
 
 
 
@@ -117,9 +118,9 @@ Proof.
       apply seq_comp_bridge_property in H_m.
       apply seq_comp_bridge_property in H'_s.
 
-      super_destruct; try (solve [omega]).
+      super_destruct; try (solve [lia]).
       (* the above destruct gives us four cases; two are discharged by
-         omega; of the remaining two only one is possible *)
+         lia; of the remaining two only one is possible *)
 
       - (* this is the only possible case, we get it from the IH *)
 
@@ -150,7 +151,7 @@ Proof.
         | [ H : context [high_event_step] |- _] => (invert_high_steps; subst)
         | [ H: context [is_stop] |-  _ ] => (do 2 unfolds in H; inverts * H)
         | [ H : 〈 _, _  〉 = 〈STOP, _ 〉 |- _] => (inversion H ; contradiction)
-        | [ H : 0 >= 1 |- _ ] => omega
+        | [ H : 0 >= 1 |- _ ] => lia
       end.
 
     Case "T_if".
@@ -215,7 +216,7 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
    do 2 match goal with
 
           | [ H: context [?X < S ?n] |- _ ]=>
-            assert (X <= n) by omega; clear H
+            assert (X <= n) by lia; clear H
           | [ H_m : 〈c1, ?m 〉 ⇨+/(SL, ?Γ , ?ev1, ?X) 〈?C1, ?M 〉,
                     H_s: 〈c1, ?s 〉 ⇨+/(SL, _ , ?ev2, ?n') 〈?C2, ?S 〉,
                          H_wt1 : -{ ?Γ, ?pc ⊢ c1 }-,
@@ -265,8 +266,8 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
 
         match goal with
           | [ H : context [ S n - ?X - 1] |- _ ] =>
-            (assert (n - X <= n) by omega;
-             replace (S n - X - 1) with ((n-X))  in * by omega
+            (assert (n - X <= n) by lia;
+             replace (S n - X - 1) with ((n-X))  in * by lia
             )        
         end.
 
@@ -316,7 +317,7 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
         super_destruct;
           (* 4 sub-goals after destruct; we appeal to low-equivalence of the guard
              to discharge the goals where both branches take separate branches *)
-          specializes* g_leq; subst; try omega;
+          specializes* g_leq; subst; try lia;
           (* 2 sub-goals remaining that correspond to both runs
              taking the same run; we handle both cases similarly by
              applying the induction hypothesis *)
@@ -324,7 +325,7 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
 
         match goal with
             |  [ H' : 〈?c_i, s 〉 ⇨+/(SL, _ , ev2, ?X) _   |- _ ]
-               =>   forwards* : H (S n - 1) c_i; omega
+               =>   forwards* : H (S n - 1) c_i; lia
         end.
         
       - (* pc' = High *)
@@ -338,7 +339,7 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
           'abstract' programs c_i, c_j, where c_i that is taken from
           the m-run, and c_j that is taken from the s-run *)
 
-        replace (S n - 1) with n in * by omega.
+        replace (S n - 1) with n in * by lia.
 
         assert (exists c_i, 〈c_i, m 〉 ⇨+/(SL, Γ, ev1, n) 〈c_end, m_end 〉
                             /\ ( c_i = c1 \/ c_i = c2  ) /\ -{ Γ, High ⊢ c_i }-) as H_i
@@ -350,7 +351,7 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
             by ( 
                 super_destruct;
 (*                match goal with  | [ H:〈_, s 〉 ⇨+/(SL, Γ, ev2, n') 〈d_end, s_end 〉|- _ ] =>
-                                   replace n' with (S (n' - 1)) in H by omega
+                                   replace n' with (S (n' - 1)) in H by lia
                 end. *)
                 solve[ exists c1; splits~ | exists c2; splits~]
               ).
@@ -382,16 +383,11 @@ Ltac apply_seq_comp_ind_IH H c1 H_leq:=
       apply while_bridge_properties in H_s.
       super_destruct.
       
-      replace (S n - 1) with n in * by omega.
+      replace (S n - 1) with n in * by lia.
 
 
-      assert ( -{ Γ, pc ⊢ IFB e THEN c;; WHILE e DO c END ELSE SKIP FI }- ).
-      {
-        apply  T_If with ℓ pc'; auto.
-        applys* T_Seq.
-        apply T_While with ℓ pc'; auto.
-        apply* T_Skip.
-      }
+      assert ( -{ Γ, pc ⊢ IFB e THEN c;; WHILE e DO c END ELSE SKIP FI }- )
+        by eauto with sem.
 
       applys* H (IFB e THEN c;; WHILE e DO c END ELSE SKIP FI).
     } (* unfocus T_While *)

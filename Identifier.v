@@ -1,4 +1,5 @@
-Require Import Bool Arith List CpdtTactics SfLib.
+From Stdlib Require Import Bool Arith List.
+Require Import CpdtTactics SfLib.
 Set Implicit Arguments.
 
 

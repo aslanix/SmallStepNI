@@ -1,5 +1,6 @@
-Require Import Bool Arith List CpdtTactics SfLib LibTactics.
-Require Import Coq.Program.Equality.
+From Stdlib Require Import Bool Arith List.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
 
 
 Set Implicit Arguments.
@@ -23,8 +24,8 @@ Proof.
   apply eq_id_dec.
 Qed.
 
-Local Hint Resolve eq_exp_dec.
-Local Hint Resolve eq_id_dec.
+#[local] Hint Resolve eq_exp_dec : core.
+#[local] Hint Resolve eq_id_dec : core.
 
 Tactic Notation "exp_cases" tactic (first) ident (c) :=
  first;
@@ -74,7 +75,7 @@ Proof.
      intros; inversion H0; crush.
      intros. inversion H2. crush.
 Qed.
-Hint Rewrite eval_is_det.
+#[export] Hint Rewrite eval_is_det : core.
 
 
 Inductive cmd : Type :=
@@ -113,20 +114,20 @@ Definition cmd_of cfg :=
   match cfg with
     | Config c _ => c
   end.
-Hint Unfold cmd_of.
+#[export] Hint Unfold cmd_of : core.
 
 Definition state_of cfg :=
   match cfg with
     | Config _ m => m
   end.
-Hint Unfold state_of.
+#[export] Hint Unfold state_of : core.
 
 (* lifiting reasoning about STOP to configurations *)
 
 Definition is_stop cfg := cmd_of cfg = STOP.
-Hint Unfold is_stop.
+#[export] Hint Unfold is_stop : core.
 Definition is_not_stop cfg := cmd_of cfg <> STOP.
-Hint Unfold is_not_stop.
+#[export] Hint Unfold is_not_stop : core.
 
 
 
@@ -156,9 +157,17 @@ Inductive step : config -> config -> Prop :=
           〈 IFB e THEN c;; WHILE e DO c END ELSE SKIP FI, st 〉
 where "cfg '⇒' cfg' " := (step cfg cfg').
 
+(* The [sem] hint database collects the constructors of the semantic, typing
+   and low-equivalence relations. It is deliberately kept separate from [core]
+   so that the existing [crush]/[auto]/[eauto]/[*]/[~] automation is unaffected
+   (the development stays stable), while new or refactored proofs can opt in to
+   the extra automation with [eauto with sem]. *)
+Create HintDb sem.
+#[export] Hint Constructors eval step : sem.
+
 
 Lemma eq_cmd_dec: forall c1 c2: cmd, {c1 = c2} + { c1<>c2 }.
 Proof.
   decide equality.
 Qed.
-Local Hint Resolve eq_cmd_dec.
+#[local] Hint Resolve eq_cmd_dec : core.

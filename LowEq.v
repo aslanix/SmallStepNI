@@ -1,5 +1,6 @@
-Require Import Bool Arith List CpdtTactics SfLib LibTactics.
-Require Import Coq.Program.Equality.
+From Stdlib Require Import Bool Arith List.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
 
 Set Implicit Arguments.
 
@@ -137,6 +138,8 @@ Inductive state_low_eq : typenv -> state -> state -> Prop:=
        (forall x ℓ, Γ x = Some ℓ -> var_low_eq Γ m1 m2 x) ->
        state_low_eq Γ m1 m2.
 
+#[export] Hint Constructors val_low_eq var_low_eq state_low_eq : sem.
+
 
 Lemma state_low_eq_sym: 
   forall Γ m s, 
@@ -227,7 +230,10 @@ Qed.
 
 (* Updating low-eq memories in a low-eq manner preserves low-equivalence *)
 
-Lemma leq_updates: 
+Create HintDb SComp.
+#[export] Hint Resolve eq_nat_dec : SComp.
+
+Lemma leq_updates:
   forall Γ ℓ x m s u v,
     state_low_eq Γ m s ->
     Γ x = Some ℓ ->
@@ -239,11 +245,8 @@ Proof.
   inversion H.
   apply state_low_eq_; auto.
   
-  Focus 3.
-
-  {
+  3: {
     intros.
-    Hint Resolve eq_nat_dec: SComp.
     rename x0 into y.
                                
     compare x y; auto with SComp.
@@ -272,7 +275,6 @@ Proof.
     
   }
 
-  Unfocus.
   {
     subst.
     unfold wf_mem in *.
@@ -362,4 +364,4 @@ Definition config_low_eq (Γ:typenv) cfg cfg' :=
     | Config c m, Config c' m' => c = c' /\ state_low_eq Γ m m'
   end.
 
-Hint Unfold config_low_eq.
+#[export] Hint Unfold config_low_eq : core.

@@ -6,9 +6,10 @@ Created: 2016-07-26
 
 *)
 
-Require Import Bool Arith List CpdtTactics SfLib LibTactics.
-Require Import Coq.Program.Equality.
-Require Import Omega.
+From Stdlib Require Import Bool Arith List.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
+From Stdlib Require Import Lia.
 Set Implicit Arguments.
 
 Require Import Identifier Environment Imperative Types Augmented Bridge.
@@ -83,9 +84,9 @@ Proof.
   -
     invert_high_steps.
     invert_step.
-    split; try omega.
+    split; try lia.
     match goal with [ |- context [S ?x - 1]] =>
-                    replace (S x - 1 ) with x by omega
+                    replace (S x - 1 ) with x by lia
     end; eauto.
 Qed.
 
@@ -108,12 +109,12 @@ Proof.
   inverts H.
   - exfalso. invert_low_steps.
   - exfalso. invert_high_steps. eauto.
-  - split~ ; try omega.
+  - split~ ; try lia.
 
     invert_high_steps.
     invert_step; [left; exists u | right];
     match goal with [ |- context [S ?x - 1]] =>
-                    replace (S x - 1 ) with x by omega
+                    replace (S x - 1 ) with x by lia
     end; eauto.
 Qed.
 
@@ -132,7 +133,7 @@ Proof.
   assumption.
 Qed.
 
-Hint Resolve is_not_stop_trivial_exf.
+#[export] Hint Resolve is_not_stop_trivial_exf : core.
 
 Lemma skip_bridge_properties:
   forall Γ n m ev c_end m_end,
@@ -312,7 +313,7 @@ Proof.
             [ _ :  〈 c1', _ 〉 ⇨+/(SL, Γ, ?EV, k) 〈 STOP, _ 〉 |- _ ]
             => (exists EV)
         end.
-        splits*; try omega.
+        splits*; try lia.
         apply bridge_trans_num with evt' 〈c1', st' 〉; eauto.
       }
     }
@@ -320,10 +321,10 @@ Proof.
 
       right; exists st' 0 evt'.
 
-      splits; try omega; eauto.
+      splits; try lia; eauto.
       - apply bridge_stop_num; eauto.
       -  unfolds is_not_stop.
-         assert (( S n - 0 - 1 =  n )) as X  by omega.
+         assert (( S n - 0 - 1 =  n )) as X  by lia.
          rewrite X.
          assumption.
     }
@@ -341,7 +342,7 @@ Proof.
   unfolds.
   repeat (splits; auto).
 Qed.
-Hint Resolve event_low_eq_empty.
+#[export] Hint Resolve event_low_eq_empty : core.
 
 Lemma event_low_eq_high:
   forall Γ x v y u,
@@ -352,7 +353,7 @@ Proof.
   repeat split; intros; inversion H; impossible_flows.
 Qed.
 
-Hint Resolve event_low_eq_high.
+#[export] Hint Resolve event_low_eq_high : core.
 
 Lemma event_low_eq_low:
   forall Γ x v,
@@ -363,7 +364,7 @@ Proof.
   repeat split; auto.
 Qed.
 
-Hint Resolve event_low_eq_low.
+#[export] Hint Resolve event_low_eq_low : core.
 
 Lemma config_low_eq_trivial:
   forall Γ m s c,
@@ -372,4 +373,4 @@ Lemma config_low_eq_trivial:
 Proof.
   intros; constructor; auto.
 Qed.
-Hint Resolve config_low_eq_trivial.
+#[export] Hint Resolve config_low_eq_trivial : core.

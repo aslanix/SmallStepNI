@@ -1,5 +1,6 @@
-Require Import Bool Arith List CpdtTactics SfLib LibTactics.
-Require Import Coq.Program.Equality.
+From Stdlib Require Import Bool Arith List.
+Require Import CpdtTactics SfLib LibTactics.
+From Stdlib Require Import Program.Equality.
 
 
 Set Implicit Arguments.
@@ -25,12 +26,12 @@ Proof.
 
   decide equality.
 Qed.
-Hint Resolve eq_level_dec.
+#[export] Hint Resolve eq_level_dec : core.
 
 
 
-Hint Resolve eq_exp_dec.
-Hint Resolve eq_id_dec.
+#[export] Hint Resolve eq_exp_dec : core.
+#[export] Hint Resolve eq_id_dec : core.
 
 
 Tactic Notation "level_cases" tactic (first) ident (c):=
@@ -42,7 +43,7 @@ Tactic Notation "level_cases" tactic (first) ident (c):=
 Inductive flowsto: level -> level -> Prop :=
   | flowsto_sym: forall ℓ, flowsto ℓ ℓ
   | flowsto_ord: flowsto Low High.
-Hint Constructors flowsto.
+#[export] Hint Constructors flowsto : core.
 
 Notation "ℓ '⊑' ℓ'" := (flowsto ℓ ℓ') (at level 35).
 
@@ -110,6 +111,8 @@ Inductive cmd_has_type : typenv -> level -> cmd -> Prop :=
 
 where "'-{' Γ ',' pc '⊢' c '}-'" := (cmd_has_type Γ pc c).
 
+#[export] Hint Constructors exp_has_level cmd_has_type : sem.
+
 Tactic Notation "cmd_has_type_cases" tactic (first) ident (c) :=
  first;
  [
@@ -135,5 +138,5 @@ Proof.
     congruence.
 Qed.
 
-Hint Resolve wt_programs_are_not_stop.
+#[export] Hint Resolve wt_programs_are_not_stop : core.
 

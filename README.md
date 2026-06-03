@@ -2,13 +2,19 @@
 
 Author: Aslan Askarov
 
-- Coq version: 8.7
+- Rocq Prover version: 9.2 (the proof also builds with the `coqc`-compatible toolchain of recent Coq/Rocq releases).
 - An (in-progress) description of the [proof architecture](#Proof Architecture) is below.
-- The standard TINI theorem is at the bottom of `TINI.v`.
+- The standard TINI theorem is at the bottom of `NI.v`.
 - The workhorse noninterference reasoning is in `NIBridge.v`.
 
 ## Usage
-Run `make` to compile everything.
+Build everything with [dune](https://dune.build):
+
+    dune build
+
+Artifacts go to `_build/` (the source tree stays clean). For interactive
+editing, VsCoq2 picks up the dune project automatically; for Proof General run
+`dune build` first (`.dir-locals.el` points it at `_build/default`).
 
 
 ## Notes
@@ -188,6 +194,70 @@ module [NI.v](NI.v).
 
 
 ## ChangeLog
+
+### 2026-06-03: Build with dune
+#### Changed
+- Migrated the build from the `rocq makefile`-generated `Makefile` to
+  [dune](https://dune.build)'s Rocq build language (`dune-project` +
+  `dune` with `(rocq.theory (name NI))` and `(include_subdirs qualified)`).
+  `dune build` now compiles everything out-of-tree into `_build/`, keeping the
+  source directory free of `.vo`/`.glob`/... artifacts.
+- Removed the old `Makefile` and `_CoqProject` (superseded by the dune files);
+  `.dir-locals.el` now points Proof General at `_build/default`.
+
+### 2026-06-03: Port to the Rocq Prover 9.2
+#### Changed
+- Updated the development to build with the Rocq Prover 9.2 (post Coq→Rocq renaming).
+- Standard-library imports now use the `From Stdlib Require ...` form (the stdlib
+  is a separate package since Rocq 9.0).
+- Replaced the removed `Omega` library / `omega` tactic with `Lia` / `lia`.
+- Replaced the removed `Implicit Arguments` command with `Arguments`, the removed
+  no-argument `instantiate` and `elimtype` tactics, and the section-less `Variable`
+  declaration in the bundled `LibTactics`.
+- Updated the bundled `SfLib` to modern `Nat.eqb` lemmas and dropped the numbered
+  `solve by inversion N` notations, whose literal numeric tokens are reserved as
+  keywords by recent Rocq and would otherwise break parsing of numeric literals.
+- Build driver now invokes `rocq makefile` / `rocq doc` instead of the renamed
+  `coq_makefile` / `coqdoc`.
+
+#### Removed all admits and axioms
+- Trimmed the bundled `SfLib` (285 -> 81 lines) down to the items this
+  development actually uses -- the `Case`/`SCase` and `solve by inversion`
+  tactics and the `relation`, `deterministic` and `ex_falso_quodlibet`
+  definitions -- deleting the unused Software-Foundations exercise material
+  (the `Admitted` exercise lemmas, the toy `ev`/`appears_in`/`next_nat`/...
+  inductives, the `beq_id`/`partial_map`/`extend` maps, and SfLib's own
+  `multi`), as well as its `admit : forall T, T` definition.
+- Replaced `LibTactics`'s `Axiom inj_pair2` with a proof (via
+  `Eqdep.EqdepTheory.inj_pair2`) and removed the `skip_axiom : False` soundness
+  hole, routing `skip`/`admit`/`demo` through the existential-variable
+  implementation (which cannot close a proof unsoundly).
+- The development now declares no `Admitted`, `Axiom`, or `Parameter`, and
+  `Print Assumptions TINI` reports *Closed under the global context*: the
+  top-level noninterference theorem is fully axiom-free.
+
+#### Optional `sem` automation database
+- Added a dedicated `sem` hint database (`Create HintDb sem`) holding the
+  constructors of the semantic, typing and low-equivalence relations
+  (`eval`, `step`, `exp_has_level`, `cmd_has_type`, `event_step`,
+  `val_low_eq`, `var_low_eq`, `state_low_eq`). It is kept *separate from*
+  `core` so that the existing `crush`/`auto`/`eauto` and LibTactics `*`/`~`
+  automation is unchanged and every existing proof stays stable; new or
+  refactored proofs can opt in with `eauto with sem`. (Putting these
+  constructors in `core` was tried and rejected: it destabilised the
+  auto-star-based proofs, and for the high-level `bridge_step_num`/`multi`
+  relations it made automation synthesise wrong existential witnesses.)
+- Used `eauto with sem` in two typing reconstructions where it pays off: the
+  `WHILE` case of `preservation_cfg` and the `IFB`/`WHILE` typing build in
+  `NIBridge` (the latter, a 6-line manual `T_If`/`T_Seq`/`T_While`/`T_Skip`
+  construction, becomes `by eauto with sem`).
+
+#### Modernized hint declarations
+- Every `Hint` now specifies an explicit database and locality
+  (`#[export] ... : core`, `#[local]` where appropriate), with `Create HintDb`
+  for the `Sec`/`SComp` databases.
+- Replaced the deprecated `Focus`/`Unfocus` vernaculars in `LowEq.v` with the
+  `N: { ... }` goal selector.
 
 ### 2016-08-03: More simplifications.
 ### Added
