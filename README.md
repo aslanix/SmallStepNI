@@ -8,7 +8,13 @@ Author: Aslan Askarov
 - The workhorse noninterference reasoning is in `NIBridge.v`.
 
 ## Usage
-Run `make` to compile everything.
+Build everything with [dune](https://dune.build):
+
+    dune build
+
+Artifacts go to `_build/` (the source tree stays clean). For interactive
+editing, VsCoq2 picks up the dune project automatically; for Proof General run
+`dune build` first (`.dir-locals.el` points it at `_build/default`).
 
 
 ## Notes
@@ -188,6 +194,16 @@ module [NI.v](NI.v).
 
 
 ## ChangeLog
+
+### 2026-06-03: Build with dune
+#### Changed
+- Migrated the build from the `rocq makefile`-generated `Makefile` to
+  [dune](https://dune.build)'s Rocq build language (`dune-project` +
+  `dune` with `(rocq.theory (name NI))` and `(include_subdirs qualified)`).
+  `dune build` now compiles everything out-of-tree into `_build/`, keeping the
+  source directory free of `.vo`/`.glob`/... artifacts.
+- Removed the old `Makefile` and `_CoqProject` (superseded by the dune files);
+  `.dir-locals.el` now points Proof General at `_build/default`.
 
 ### 2026-06-03: Port to the Rocq Prover 9.2
 #### Changed
